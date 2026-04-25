@@ -1,1604 +1,625 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Bunny's Sales Intelligence Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Sales and KPI Performance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            /* Power BI Inspired Palette - Light */
+            --bg-app: #f0f2f5;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --bg-header: #002050;
+            --text-main: #1a1a1a;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --accent: #005a9e; /* PBI Blue */
+            --accent-hover: #004578;
+            --success: #107c10;
+            --danger: #a4262c;
+            --warning: #ffb900;
+            
+            --header-h: 56px;
+            --sidebar-w: 240px;
+            --radius: 6px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-:root {
-  /* Brand Colors */
-  --blue: #4868A8;
-  --navy: #1C3D7A;
-  --night: #001840;
-  --sky: #6B8FC4;
-  --ice: #E8F0FA;
+        [data-theme="dark"] {
+            --bg-app: #0b0f19;
+            --bg-card: #151c2c;
+            --bg-sidebar: #151c2c;
+            --bg-header: #000000;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --border: #2d3748;
+            --accent: #2883ca;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
 
-  /* Extended Palette */
-  --surface: #ffffff;
-  --surface2: #f3f6fb;
-  --border: rgba(72,104,168,0.13);
-  --border-strong: rgba(72,104,168,0.25);
-  --text-primary: #0d1b35;
-  --text-secondary: #3a4f72;
-  --text-muted: #7a8fae;
-  --text-light: #a8bdd4;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-app);
+            color: var(--text-main);
+            overflow: hidden; /* Executive dashboards rarely scroll the whole body */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-  --success: #0fa86a;
-  --success-bg: #e6f8f1;
-  --warning: #e09500;
-  --warning-bg: #fff8e6;
-  --danger: #e03838;
-  --danger-bg: #fdeaea;
+        /* ─── Header ────────────────────────────────────────────── */
+        header {
+            height: var(--header-h);
+            background: var(--bg-header);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+            justify-content: space-between;
+        }
 
-  --shadow-xs: 0 1px 3px rgba(28,61,122,0.06);
-  --shadow-sm: 0 2px 8px rgba(28,61,122,0.08), 0 1px 3px rgba(28,61,122,0.05);
-  --shadow-md: 0 6px 24px rgba(28,61,122,0.10), 0 2px 6px rgba(28,61,122,0.06);
-  --shadow-lg: 0 16px 48px rgba(28,61,122,0.14), 0 4px 12px rgba(28,61,122,0.08);
-  --shadow-glow: 0 0 0 3px rgba(72,104,168,0.15);
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: calc(var(--sidebar-w) - 16px);
+        }
 
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+        .brand-title {
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+        }
 
-  --sidebar-w: 260px;
-  --header-h: 62px;
-  --font: 'Plus Jakarta Sans', sans-serif;
-  --mono: 'JetBrains Mono', monospace;
+        .top-filters {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px;
+        }
 
-  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
+        .filter-pill {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: var(--radius);
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.9);
+            font-size: 12px;
+        }
 
-body {
-  font-family: var(--font);
-  background: var(--ice);
-  color: var(--text-primary);
-  min-height: 100vh;
-  font-size: 13.5px;
-  line-height: 1.55;
-  overflow-x: hidden;
-}
+        .filter-pill select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
 
-/* ─── Scrollbar ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--sky); }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-/* ─── Header ────────────────────────────────────────────── */
-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
-  background: var(--night);
-  display: flex;
-  align-items: center;
-  padding: 0 20px 0 0;
-  z-index: 200;
-  box-shadow: 0 2px 16px rgba(0,24,64,0.35);
-}
+        /* ─── Sidebar ───────────────────────────────────────────── */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
 
-.header-brand {
-  width: var(--sidebar-w);
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 0 20px;
-  border-right: 1px solid rgba(255,255,255,0.07);
-  height: 100%;
-  flex-shrink: 0;
-}
+        aside {
+            width: var(--sidebar-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
 
-.logo-img {
-  height: 36px;
-  width: auto;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
+        .nav-section {
+            border-bottom: 1px solid var(--border);
+        }
 
-.brand-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-}
-.brand-sub {
-  font-size: 10px;
-  color: rgba(255,255,255,0.45);
-  font-weight: 400;
-  letter-spacing: 0.03em;
-}
+        .nav-header {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
 
-.header-center {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding-left: 24px;
-  gap: 12px;
-}
+        .nav-content {
+            padding: 4px 8px 12px;
+            display: none;
+        }
+        .nav-section.open .nav-content { display: block; }
+        .nav-section.open .chevron { transform: rotate(180deg); }
 
-.header-report-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.92);
-  letter-spacing: 0.01em;
-}
+        .nav-item {
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 2px;
+            transition: var(--transition);
+        }
 
-.header-badge {
-  background: rgba(107,143,196,0.2);
-  border: 1px solid rgba(107,143,196,0.3);
-  color: var(--sky);
-  border-radius: 99px;
-  padding: 2px 10px;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
+        .nav-item:hover { background: var(--bg-app); }
+        .nav-item.active { background: var(--accent); color: white; }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+        /* ─── Main Content ───────────────────────────────────────── */
+        main {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: var(--bg-app);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-.hdr-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.75);
-  font-size: 12px;
-  font-weight: 500;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: var(--transition);
-}
-.hdr-btn:hover {
-  background: rgba(72,104,168,0.3);
-  border-color: rgba(107,143,196,0.4);
-  color: #fff;
-}
-.hdr-btn svg { width: 14px; height: 14px; }
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
 
-.hdr-btn.primary {
-  background: var(--blue);
-  border-color: transparent;
-  color: #fff;
-}
-.hdr-btn.primary:hover {
-  background: #5a7bbf;
-}
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-/* ─── Sidebar ───────────────────────────────────────────── */
-.sidebar {
-  position: fixed;
-  top: var(--header-h);
-  left: 0;
-  bottom: 0;
-  width: var(--sidebar-w);
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
-  z-index: 150;
-  display: flex;
-  flex-direction: column;
-}
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
 
-.sidebar-section {
-  padding: 16px 14px 8px;
-}
-.sidebar-section + .sidebar-section {
-  border-top: 1px solid var(--border);
-}
+        .kpi-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
 
-.sidebar-label {
-  font-size: 9.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  padding: 0 6px;
-}
+        .visual-container {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-/* Navigation */
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: var(--transition);
-  margin-bottom: 2px;
-  position: relative;
-  text-decoration: none;
-  color: var(--text-secondary);
-  font-size: 12.5px;
-  font-weight: 500;
-  border: 1px solid transparent;
-}
-.nav-item:hover {
-  background: var(--ice);
-  color: var(--navy);
-}
-.nav-item.active {
-  background: linear-gradient(135deg, rgba(72,104,168,0.12), rgba(107,143,196,0.08));
-  color: var(--blue);
-  border-color: rgba(72,104,168,0.18);
-  font-weight: 600;
-}
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: -14px; top: 50%;
-  transform: translateY(-50%);
-  width: 3px; height: 20px;
-  background: var(--blue);
-  border-radius: 0 2px 2px 0;
-}
-.nav-icon {
-  width: 28px; height: 28px;
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--ice);
-  flex-shrink: 0;
-}
-.nav-item.active .nav-icon {
-  background: rgba(72,104,168,0.14);
-}
-.nav-icon svg { width: 14px; height: 14px; }
-.nav-text { flex: 1; }
-.nav-short {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  margin-top: 1px;
-}
-.nav-item.active .nav-short { color: rgba(72,104,168,0.6); }
+        .visual-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-/* Filters */
-.filter-group { margin-bottom: 14px; }
-.filter-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 7px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.filter-label svg { width: 12px; height: 12px; opacity: 0.6; }
+        .visual-title { font-size: 14px; font-weight: 700; }
 
-.filter-select {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-strong);
-  background: var(--surface2);
-  color: var(--text-primary);
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 500;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a8fae' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  cursor: pointer;
-  transition: var(--transition);
-}
-.filter-select:focus {
-  outline: none;
-  border-color: var(--blue);
-  box-shadow: var(--shadow-glow);
-  background-color: var(--surface);
-}
+        .table-wrap {
+            flex: 1;
+            overflow: auto;
+            padding: 12px;
+        }
 
-.metric-toggle {
-  display: flex;
-  background: var(--ice);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 2px;
-}
-.metric-btn {
-  flex: 1;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  text-align: center;
-}
-.metric-btn.active {
-  background: var(--blue);
-  color: #fff;
-  box-shadow: var(--shadow-xs);
-}
-.metric-btn:hover:not(.active) {
-  background: rgba(72,104,168,0.1);
-  color: var(--blue);
-}
+        /* ─── Heatmap Table ────────────────────────────────────── */
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { 
+            position: sticky; top: 0; background: var(--bg-card);
+            padding: 8px; font-weight: 700; color: var(--text-sub);
+            text-align: center; border-bottom: 2px solid var(--border);
+            z-index: 10;
+        }
+        td { padding: 4px; text-align: center; border: 1px solid var(--border); }
+        .row-label { text-align: left; font-weight: 600; padding-left: 12px; min-width: 120px; }
+        
+        .cell-value {
+            width: 100%;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
 
-.sidebar-footer {
-  margin-top: auto;
-  padding: 14px;
-  border-top: 1px solid var(--border);
-}
-.filter-reset-btn {
-  width: 100%;
-  padding: 9px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-strong);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font);
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.filter-reset-btn:hover {
-  background: var(--danger-bg);
-  border-color: rgba(224,56,56,0.3);
-  color: var(--danger);
-}
-.filter-reset-btn svg { width: 13px; height: 13px; }
+        /* ─── Theme Toggle ─────────────────────────────────────── */
+        .icon-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
 
-/* ─── Main Content ───────────────────────────────────────── */
-.main {
-  margin-left: var(--sidebar-w);
-  margin-top: var(--header-h);
-  min-height: calc(100vh - var(--header-h));
-}
+        /* ─── Utilities ────────────────────────────────────────── */
+        .hidden { display: none; }
+        .chevron { transition: var(--transition); width: 14px; height: 14px; }
 
-/* ─── Report Page ─────────────────────────────────────────── */
-.report-page {
-  display: none;
-  padding: 28px 28px 60px;
-  animation: fadeSlideIn 0.3s ease both;
-}
-.report-page.active { display: block; }
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── Page Hero ──────────────────────────────────────────── */
-.page-hero {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.page-hero-left {}
-.page-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--night);
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-.page-sub {
-  font-size: 12.5px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-.page-hero-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ─── KPI Grid ───────────────────────────────────────────── */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.kpi-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px 22px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition), transform var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-.kpi-card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--kpi-gradient, linear-gradient(90deg, var(--blue), var(--sky)));
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-.kpi-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-.kpi-icon-wrap {
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--kpi-icon-bg, var(--ice));
-  margin-bottom: 14px;
-}
-.kpi-icon-wrap svg { width: 18px; height: 18px; }
-.kpi-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-.kpi-value {
-  font-size: 30px;
-  font-weight: 800;
-  color: var(--night);
-  letter-spacing: -0.03em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.kpi-sub {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 6px;
-}
-.kpi-delta {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 99px;
-  margin-top: 8px;
-}
-.kpi-delta.up { background: var(--success-bg); color: var(--success); }
-.kpi-delta.down { background: var(--danger-bg); color: var(--danger); }
-.kpi-delta svg { width: 10px; height: 10px; }
-
-/* ─── Section Card ──────────────────────────────────────── */
-.section-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-.section-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 22px;
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap; gap: 10px;
-  background: linear-gradient(to right, rgba(232,240,250,0.4), transparent);
-}
-.section-title {
-  font-size: 14px; font-weight: 700;
-  color: var(--night);
-  letter-spacing: -0.01em;
-}
-.section-sub {
-  font-size: 11.5px; color: var(--text-muted);
-  margin-top: 2px;
-}
-.section-body {
-  padding: 20px 22px;
-  overflow-x: auto;
-}
-
-/* ─── Heatmap ────────────────────────────────────────────── */
-.hm-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 3px;
-}
-.hm-table th {
-  font-family: var(--font);
-  font-size: 10.5px; font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase; letter-spacing: 0.06em;
-  padding: 6px 8px;
-  text-align: center;
-  white-space: nowrap;
-}
-.hm-table th.row-header { text-align: left; }
-.hm-table td.ob-cell {
-  font-family: var(--mono);
-  font-size: 11.5px; font-weight: 500;
-  color: var(--text-primary);
-  padding: 4px 12px 4px 4px;
-  white-space: nowrap;
-}
-.hm-cell { padding: 0; text-align: center; vertical-align: middle; }
-.cell-box {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 68px; height: 34px;
-  border-radius: 6px;
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 0.01em;
-  transition: transform 0.12s, box-shadow 0.12s;
-  cursor: default; width: 100%;
-}
-.cell-box:hover {
-  transform: scale(1.08);
-  z-index: 2; position: relative;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-.cell-empty {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 68px; height: 34px;
-  border-radius: 6px;
-  background: var(--ice); color: var(--text-muted);
-  font-size: 11px; width: 100%;
-}
-.total-box {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 68px; height: 34px;
-  border-radius: 6px;
-  font-family: var(--mono);
-  font-size: 11.5px; font-weight: 600;
-  background: var(--ice); color: var(--text-primary);
-  border: 1px solid var(--border-strong);
-  width: 100%;
-}
-
-.legend {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 10.5px; color: var(--text-muted);
-}
-.legend-bar {
-  width: 120px; height: 8px;
-  border-radius: 99px;
-  background: linear-gradient(to right, #f8696b, #ffeb84, #63be7b);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
-/* ─── 404 Placeholder ────────────────────────────────────── */
-.placeholder-wrapper {
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.placeholder-card {
-  text-align: center;
-  padding: 60px 40px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-  max-width: 500px;
-  width: 100%;
-}
-
-.ph-icon-ring {
-  width: 88px; height: 88px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--ice), rgba(232,240,250,0.5));
-  border: 2px dashed var(--border-strong);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 24px;
-  position: relative;
-}
-.ph-icon-ring::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1px dashed rgba(72,104,168,0.15);
-}
-.ph-icon-ring svg { width: 36px; height: 36px; opacity: 0.4; }
-
-.ph-code {
-  font-family: var(--mono);
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--ice);
-  letter-spacing: -0.05em;
-  line-height: 1;
-  background: linear-gradient(135deg, var(--blue), var(--sky));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 10px;
-}
-.ph-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--night);
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
-.ph-desc {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.7;
-  max-width: 340px;
-  margin: 0 auto 24px;
-}
-.ph-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 16px;
-  background: linear-gradient(135deg, rgba(72,104,168,0.08), rgba(107,143,196,0.06));
-  border: 1px solid rgba(72,104,168,0.18);
-  border-radius: 99px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--blue);
-  letter-spacing: 0.02em;
-}
-.ph-badge svg { width: 12px; height: 12px; }
-
-.ph-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 20px;
-}
-.ph-chip {
-  padding: 5px 12px;
-  background: var(--ice);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-/* ─── State Box ──────────────────────────────────────────── */
-.state-box {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 50px 20px;
-  color: var(--text-muted); font-size: 13px; gap: 10px;
-}
-.state-box svg { width: 32px; height: 32px; opacity: 0.3; }
-
-/* ─── Loading Spinner ─────────────────────────────────────── */
-.spinner {
-  width: 32px; height: 32px;
-  border: 3px solid var(--ice);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── Export Dropdown ─────────────────────────────────────── */
-.export-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  width: 180px;
-  z-index: 500;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity 0.15s, transform 0.15s;
-}
-.export-menu.open {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: all;
-}
-.export-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: background var(--transition);
-}
-.export-menu-item:hover { background: var(--ice); color: var(--blue); }
-.export-menu-item svg { width: 14px; height: 14px; flex-shrink: 0; }
-.export-menu-sep { height: 1px; background: var(--border); }
-
-.hdr-export-wrap { position: relative; }
-
-/* ─── Toast ──────────────────────────────────────────────── */
-.toast {
-  position: fixed;
-  bottom: 24px; right: 24px;
-  background: var(--night);
-  color: #fff;
-  padding: 12px 18px;
-  border-radius: var(--radius);
-  font-size: 12.5px;
-  font-weight: 500;
-  display: flex; align-items: center; gap: 10px;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(80px);
-  opacity: 0;
-  transition: transform 0.3s, opacity 0.3s;
-  z-index: 9999;
-  max-width: 320px;
-}
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-/* ─── Animations ─────────────────────────────────────────── */
-@keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
-.anim { animation: fadeUp 0.35s ease both; }
-.anim-1 { animation-delay: 0.05s; }
-.anim-2 { animation-delay: 0.10s; }
-.anim-3 { animation-delay: 0.15s; }
-.anim-4 { animation-delay: 0.20s; }
-.anim-5 { animation-delay: 0.25s; }
-
-/* ─── Responsive ─────────────────────────────────────────── */
-@media (max-width: 900px) {
-  :root { --sidebar-w: 220px; }
-  .kpi-value { font-size: 24px; }
-}
-</style>
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════ HEADER ══════════════════════════════════ -->
-<header id="appHeader">
-  <div class="header-brand">
-    <img class="logo-img"
-         src="https://i.ibb.co/5XpmYYZz/image.png"
-         alt="Bunny's"
-         onerror="this.style.display='none';document.getElementById('fallbackLogo').style.display='flex'">
-    <div id="fallbackLogo" style="display:none;width:34px;height:34px;background:var(--blue);border-radius:8px;align-items:center;justify-content:center;">
-      <svg viewBox="0 0 20 20" fill="none" width="18" height="18">
-        <circle cx="10" cy="8" r="4" fill="white" opacity=".9"/>
-        <ellipse cx="6" cy="5" rx="1.5" ry="3" fill="white" opacity=".7" transform="rotate(-15 6 5)"/>
-        <ellipse cx="14" cy="5" rx="1.5" ry="3" fill="white" opacity=".7" transform="rotate(15 14 5)"/>
-      </svg>
-    </div>
-    <div>
-      <div class="brand-name">Bunny's</div>
-      <div class="brand-sub">Sales Intelligence</div>
-    </div>
-  </div>
-
-  <div class="header-center">
-    <div class="header-report-name" id="headerReportName">Performance Overview</div>
-    <div class="header-badge" id="dateRangeBadge">Loading…</div>
-  </div>
-
-  <div class="header-right">
-    <div class="hdr-export-wrap">
-      <button class="hdr-btn" id="exportToggleBtn" onclick="toggleExportMenu()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
-          <path d="M8 1v9M5 7l3 3 3-3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke-linecap="round"/>
-        </svg>
-        Export
-        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <path d="M1 1l4 4 4-4"/>
-        </svg>
-      </button>
-      <div class="export-menu" id="exportMenu">
-        <div class="export-menu-item" onclick="exportExcel()">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="1" y="1" width="14" height="14" rx="2"/>
-            <path d="M5 5l6 6M11 5l-6 6" stroke-linecap="round"/>
-          </svg>
-          Export to Excel
+<header>
+    <div class="brand-box">
+        <div style="background: white; border-radius: 4px; padding: 4px; display: flex;">
+            <svg width="20" height="20" viewBox="0 0 100 100">
+                <rect x="20" y="40" width="15" height="40" fill="#005a9e"/>
+                <rect x="42" y="20" width="15" height="60" fill="#005a9e"/>
+                <rect x="64" y="50" width="15" height="30" fill="#005a9e"/>
+            </svg>
         </div>
-        <div class="export-menu-sep"></div>
-        <div class="export-menu-item" onclick="exportImage()">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="1" y="3" width="14" height="10" rx="1.5"/>
-            <circle cx="5.5" cy="7" r="1.5"/>
-            <path d="M1 11l4-4 3 3 2-2 5 5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Export as Image
-        </div>
-      </div>
+        <div class="brand-title">Daily Sales & KPI</div>
     </div>
-  </div>
+
+    <div class="top-filters">
+        <div class="filter-pill">
+            <span>Distributor:</span>
+            <select id="filterDistributor" onchange="updateDashboard()">
+                <option value="All">All Distributors</option>
+            </select>
+        </div>
+        <div class="filter-pill">
+            <span>Category:</span>
+            <select id="filterCategory" onchange="updateDashboard()">
+                <option value="All">All Categories</option>
+            </select>
+        </div>
+        <div class="filter-pill">
+            <span>Position:</span>
+            <select id="filterPosition" onchange="updateDashboard()">
+                <option value="All">All Positions</option>
+                <option value="Top">Top Position</option>
+                <option value="Mid">Mid Position</option>
+                <option value="Secondary">Secondary</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+        <button class="icon-btn" onclick="exportData()" title="Export CSV">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </button>
+    </div>
 </header>
 
-<!-- ══════════════════════════════ SIDEBAR ══════════════════════════════════ -->
-<aside class="sidebar">
-
-  <!-- Navigation -->
-  <div class="sidebar-section">
-    <div class="sidebar-label">Reports</div>
-
-    <div class="nav-item active" onclick="switchReport('overview')" data-report="overview">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.5">
-          <rect x="1" y="1" width="6" height="6" rx="1.5"/>
-          <rect x="9" y="1" width="6" height="6" rx="1.5"/>
-          <rect x="1" y="9" width="6" height="6" rx="1.5"/>
-          <rect x="9" y="9" width="6" height="6" rx="1.5"/>
-        </svg>
-      </div>
-      <div class="nav-text">
-        <div>Day Wise Trends</div>
-        <div class="nav-short">Day Wise Trend</div>
-      </div>
-    </div>
-
-    <div class="nav-item" onclick="switchReport('tgt')" data-report="tgt">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
-          <circle cx="8" cy="8" r="6.5"/>
-          <circle cx="8" cy="8" r="3.5"/>
-          <circle cx="8" cy="8" r="1"/>
-        </svg>
-      </div>
-      <div class="nav-text">
-        <div>Target vs Achievement</div>
-        <div class="nav-short">Ach vs Target</div>
-      </div>
-    </div>
-
-    <div class="nav-item" onclick="switchReport('incen')" data-report="incen">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
-          <path d="M8 1v14M4 4l4-3 4 3" stroke-linecap="round"/>
-          <path d="M3 9h10" stroke-linecap="round"/>
-          <path d="M4 12h8" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="nav-text">
-        <div>Sales Team Incentives</div>
-        <div class="nav-short">Sales Team Inc.</div>
-      </div>
-    </div>
-
-    <div class="nav-item" onclick="switchReport('lmt')" data-report="lmt">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
-          <path d="M1 13l4-8 3 4 2-3 5 7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="nav-text">
-        <div>LMT Stores</div>
-        <div class="nav-short">LMT</div>
-      </div>
-    </div>
-
-    <div class="nav-item" onclick="switchReport('ws')" data-report="ws">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
-          <rect x="1" y="6" width="14" height="9" rx="1.5"/>
-          <path d="M4 6V4a4 4 0 018 0v2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="nav-text">
-        <div>WS Stores</div>
-        <div class="nav-short">WS</div>
-      </div>
-    </div>
-
-    <div class="nav-item" onclick="switchReport('stands')" data-report="stands">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
-          <path d="M8 1v12M5 13h6" stroke-linecap="round"/>
-          <path d="M3 4h10l-1 5H4L3 4z" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="nav-text">
-        <div>Stands Outlets</div>
-        <div class="nav-short">Stands Outlets</div>
-      </div>
-    </div>
-
-    <div class="nav-item" onclick="switchReport('top20')" data-report="top20">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
-          <path d="M8 2l1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6z" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="nav-text">
-        <div>Top N Outlets</div>
-        <div class="nav-short">Top N Stores</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="sidebar-section">
-    <div class="sidebar-label">Global Filters</div>
-
-    <div class="filter-group">
-      <div class="filter-label">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M1 3h10M3 6h6M5 9h2" stroke-linecap="round"/>
-        </svg>
-        Category
-      </div>
-      <select class="filter-select" id="filterCategory" onchange="applyFilters()">
-        <option value="All">All Categories</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <div class="filter-label">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="6" cy="6" r="4.5"/>
-          <path d="M2 6h8M6 1.5c-1.5 1.5-1.5 7 0 9M6 1.5c1.5 1.5 1.5 7 0 9" stroke-linecap="round"/>
-        </svg>
-        Channel
-      </div>
-      <select class="filter-select" id="filterChannel" onchange="applyFilters()">
-        <option value="All">All Channels</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <div class="filter-label">Metric</div>
-      <div class="metric-toggle">
-        <button class="metric-btn active" id="btnCtns" onclick="setMetric('ctns')">Sales CTN</button>
-        <button class="metric-btn" id="btnInv" onclick="setMetric('invoices')">Invoices</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="sidebar-footer">
-    <button class="filter-reset-btn" onclick="resetFilters()">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M2 7A5 5 0 1 0 7 2" stroke-linecap="round"/>
-        <path d="M2 2v5h5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Reset Filters
-    </button>
-  </div>
-
-</aside>
-
-<!-- ══════════════════════════════ MAIN ══════════════════════════════════════ -->
-<main class="main" id="mainContent">
-
-  <!-- ── Report: Day Wise Trends (OVERVIEW) ── -->
-  <div class="report-page active" id="page-overview">
-    <div class="page-hero anim anim-1">
-      <div class="page-hero-left">
-        <div class="page-title">Day Wise Trends</div>
-        <div class="page-sub" id="pageSubtitle">Loading data…</div>
-      </div>
-    </div>
-
-    <div class="kpi-grid" id="kpiGrid">
-      <div class="kpi-card anim anim-1"><div class="state-box"><div class="spinner"></div></div></div>
-    </div>
-
-    <div class="section-card anim anim-4">
-      <div class="section-head">
-        <div>
-          <div class="section-title">Order Booker × Date Heatmap</div>
-          <div class="section-sub" id="hmSubtitle">Loading…</div>
+<div class="app-container">
+    <aside>
+        <div class="nav-section open" id="sectionCore">
+            <div class="nav-header" onclick="toggleSection('sectionCore')">
+                CORE REPORTS
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="nav-content">
+                <a class="nav-item active">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    Performance
+                </a>
+                <a class="nav-item">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                    Daily Trends
+                </a>
+            </div>
         </div>
-        <div class="legend">
-          <span>Low</span>
-          <div class="legend-bar"></div>
-          <span>High</span>
-        </div>
-      </div>
-      <div class="section-body">
-        <div id="hmContainer"><div class="state-box"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── Placeholder Reports ── -->
-  <div class="report-page" id="page-tgt">
-    <div class="page-hero anim anim-1">
-      <div class="page-hero-left">
-        <div class="page-title">Target vs Achievement</div>
-        <div class="page-sub">Sales performance against set targets</div>
-      </div>
-    </div>
-    <div class="placeholder-wrapper anim anim-2">
-      <div class="placeholder-card">
-        <div class="ph-icon-ring">
-          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
-            <circle cx="18" cy="18" r="15"/><circle cx="18" cy="18" r="8"/><circle cx="18" cy="18" r="2"/>
-          </svg>
+        <div class="nav-section" id="sectionDetail">
+            <div class="nav-header" onclick="toggleSection('sectionDetail')">
+                DISTRIBUTION
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="nav-content">
+                <a class="nav-item">LMT Stores</a>
+                <a class="nav-item">WS Network</a>
+                <a class="nav-item">Stands</a>
+            </div>
         </div>
-        <div class="ph-code">404</div>
-        <div class="ph-title">Report Under Construction</div>
-        <div class="ph-desc">The <strong>Target vs Achievement</strong> report is being built. It will display sales performance metrics compared to set targets across all channels and categories.</div>
-        <div class="ph-badge">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
-          Coming Soon
-        </div>
-        <div class="ph-chips">
-          <span class="ph-chip">Ach vs Target</span>
-          <span class="ph-chip">Channel Breakdown</span>
-          <span class="ph-chip">SKU Level</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="report-page" id="page-incen">
-    <div class="page-hero anim anim-1">
-      <div class="page-hero-left">
-        <div class="page-title">Sales Team Incentives</div>
-        <div class="page-sub">Individual performance & incentive calculations</div>
-      </div>
-    </div>
-    <div class="placeholder-wrapper anim anim-2">
-      <div class="placeholder-card">
-        <div class="ph-icon-ring">
-          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
-            <path d="M18 4v28M8 10l10-6 10 6"/><path d="M6 22h24"/><path d="M8 26h20"/>
-          </svg>
+        <div class="nav-section" id="sectionTeam">
+            <div class="nav-header" onclick="toggleSection('sectionTeam')">
+                SALES TEAM
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="nav-content">
+                <a class="nav-item">Incentives</a>
+                <a class="nav-item">OB Ranking</a>
+            </div>
         </div>
-        <div class="ph-code">404</div>
-        <div class="ph-title">Report Under Construction</div>
-        <div class="ph-desc">The <strong>Sales Team Incentives</strong> report will show OB-level performance scores, incentive tiers, and payout calculations based on CTN and invoice targets.</div>
-        <div class="ph-badge">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
-          Coming Soon
-        </div>
-        <div class="ph-chips">
-          <span class="ph-chip">Sales Team Inc.</span>
-          <span class="ph-chip">OB Rankings</span>
-          <span class="ph-chip">Incentive Tiers</span>
-        </div>
-      </div>
-    </div>
-  </div>
+    </aside>
 
-  <div class="report-page" id="page-lmt">
-    <div class="page-hero anim anim-1">
-      <div class="page-hero-left">
-        <div class="page-title">LMT Stores</div>
-        <div class="page-sub">Large Modern Trade store performance</div>
-      </div>
-    </div>
-    <div class="placeholder-wrapper anim anim-2">
-      <div class="placeholder-card">
-        <div class="ph-icon-ring">
-          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
-            <path d="M4 30V12l14-8 14 8v18H4z"/><rect x="13" y="18" width="10" height="12" rx="1"/>
-          </svg>
+    <main id="captureArea">
+        <div class="kpi-strip">
+            <div class="kpi-card">
+                <div class="kpi-label">Sales in Ctns (Avg/Day)</div>
+                <div class="kpi-value" id="kpi-ctns">0.00</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Bills Avg / Day</div>
+                <div class="kpi-value" id="kpi-bills">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">No of OBs (Avg/Day)</div>
+                <div class="kpi-value" id="kpi-obs">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Sku/Shop (Avg)</div>
+                <div class="kpi-value" id="kpi-sku">0.0</div>
+            </div>
         </div>
-        <div class="ph-code">404</div>
-        <div class="ph-title">Report Under Construction</div>
-        <div class="ph-desc">The <strong>LMT Stores</strong> report will cover Large Modern Trade outlets with volume trends, SKU penetration, and shelf performance analytics.</div>
-        <div class="ph-badge">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
-          Coming Soon
-        </div>
-        <div class="ph-chips">
-          <span class="ph-chip">LMT</span>
-          <span class="ph-chip">Store Analytics</span>
-          <span class="ph-chip">SKU Depth</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="report-page" id="page-ws">
-    <div class="page-hero anim anim-1">
-      <div class="page-hero-left">
-        <div class="page-title">WS Stores</div>
-        <div class="page-sub">Wholesale store network performance</div>
-      </div>
-    </div>
-    <div class="placeholder-wrapper anim anim-2">
-      <div class="placeholder-card">
-        <div class="ph-icon-ring">
-          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
-            <rect x="4" y="14" width="28" height="18" rx="2"/>
-            <path d="M10 14V9a8 8 0 0116 0v5"/>
-          </svg>
+        <div class="visual-container">
+            <div class="visual-header">
+                <div class="visual-title">OB Wise Daily Performance Matrix</div>
+                <div style="display: flex; gap: 8px;">
+                    <div id="statusBadge" style="font-size: 11px; background: var(--bg-app); padding: 2px 8px; border-radius: 10px; color: var(--text-sub);">Loading data...</div>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="heatmapTable">
+                    <thead><tr id="theadRow"></tr></thead>
+                    <tbody id="tbodyData"></tbody>
+                </table>
+            </div>
         </div>
-        <div class="ph-code">404</div>
-        <div class="ph-title">Report Under Construction</div>
-        <div class="ph-desc">The <strong>WS Stores</strong> report will provide wholesale channel insights including volume velocity, outlet coverage, and order frequency analytics.</div>
-        <div class="ph-badge">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
-          Coming Soon
-        </div>
-        <div class="ph-chips">
-          <span class="ph-chip">WS</span>
-          <span class="ph-chip">Wholesale</span>
-          <span class="ph-chip">Coverage Map</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="report-page" id="page-stands">
-    <div class="page-hero anim anim-1">
-      <div class="page-hero-left">
-        <div class="page-title">Stands Outlets</div>
-        <div class="page-sub">Stand-based outlet sales and coverage</div>
-      </div>
-    </div>
-    <div class="placeholder-wrapper anim anim-2">
-      <div class="placeholder-card">
-        <div class="ph-icon-ring">
-          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
-            <path d="M18 4v26M12 30h12"/><path d="M7 9h22l-2 12H9L7 9z"/>
-          </svg>
-        </div>
-        <div class="ph-code">404</div>
-        <div class="ph-title">Report Under Construction</div>
-        <div class="ph-desc">The <strong>Stands Outlets</strong> report will track kiosk and stand-based retail performance, footfall conversion, and product placement effectiveness.</div>
-        <div class="ph-badge">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
-          Coming Soon
-        </div>
-        <div class="ph-chips">
-          <span class="ph-chip">Stands Outlets</span>
-          <span class="ph-chip">Kiosk Data</span>
-          <span class="ph-chip">Placement</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="report-page" id="page-top20">
-    <div class="page-hero anim anim-1">
-      <div class="page-hero-left">
-        <div class="page-title">Top N Outlets</div>
-        <div class="page-sub">Highest performing outlets ranked by volume</div>
-      </div>
-    </div>
-    <div class="placeholder-wrapper anim anim-2">
-      <div class="placeholder-card">
-        <div class="ph-icon-ring">
-          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
-            <path d="M18 5l2.5 7.5H28l-6.5 4.7 2.5 7.5-6.5-4.7-6.5 4.7 2.5-7.5L7 12.5h7.5z"/>
-          </svg>
-        </div>
-        <div class="ph-code">404</div>
-        <div class="ph-title">Report Under Construction</div>
-        <div class="ph-desc">The <strong>Top N Outlets</strong> report will surface your best-performing stores dynamically ranked by CTN volume, invoice frequency, and SKU breadth.</div>
-        <div class="ph-badge">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
-          Coming Soon
-        </div>
-        <div class="ph-chips">
-          <span class="ph-chip">Top N Stores</span>
-          <span class="ph-chip">Dynamic N</span>
-          <span class="ph-chip">Rankings</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<!-- ══ Toast ══ -->
-<div class="toast" id="toast">
-  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
-    <path d="M2 8l4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  <span id="toastMsg">Done!</span>
+    </main>
 </div>
 
 <script>
-/* ─── Helpers ───────────────────────────────────────────── */
-function groupBy(arr, key) {
-  return arr.reduce((m, v) => { (m[v[key]] = m[v[key]] || []).push(v); return m; }, {});
-}
-function unique(arr) { return [...new Set(arr)]; }
-function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
-function avg(arr) { return arr.length ? sum(arr) / arr.length : 0; }
-function fmt(n, d) {
-  if (n === null || n === undefined) return '—';
-  return Number(n).toFixed(d !== undefined ? d : 2);
-}
-function fmtDate(d) {
-  const [y, m, day] = d.split('-');
-  return `${day}/${m}`;
-}
+    let rawData = [];
+    let state = {
+        theme: 'light',
+        distributor: 'All',
+        category: 'All',
+        position: 'All'
+    };
 
-function rdYlGn(t) {
-  t = Math.max(0, Math.min(1, t));
-  let r, g, b;
-  if (t < 0.5) {
-    const s = t / 0.5;
-    r = Math.round(248 + (255 - 248) * s);
-    g = Math.round(105 + (235 - 105) * s);
-    b = Math.round(107 + (132 - 107) * s);
-  } else {
-    const s = (t - 0.5) / 0.5;
-    r = Math.round(255 + (99 - 255) * s);
-    g = Math.round(235 + (190 - 235) * s);
-    b = Math.round(132 + (123 - 132) * s);
-  }
-  return `rgb(${r},${g},${b})`;
-}
+    // ─── Initialization ──────────────────────────────────────────
 
-function textColor(bgRgb) {
-  const m = bgRgb.match(/\d+/g).map(Number);
-  const [r, g, b] = m.map(c => {
-    c /= 255;
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  });
-  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return L > 0.35 ? '#0d1b35' : '#ffffff';
-}
+    window.onload = () => {
+        // Attempt to fetch data.json or fallback to demo
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                rawData = data;
+                initApp();
+            })
+            .catch(() => {
+                console.warn("Using Demo Data...");
+                rawData = generateDemoData();
+                initApp();
+            });
+    };
 
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.style.background = isError ? '#c0392b' : 'var(--night)';
-  document.getElementById('toastMsg').textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-/* ─── State ─────────────────────────────────────────────── */
-let allData = [];
-let currentMetric = 'ctns';
-let currentCategory = 'All';
-let currentChannel = 'All';
-let currentReport = 'overview';
-
-const REPORT_NAMES = {
-  overview: 'Day Wise Trends',
-  tgt:      'Target vs Achievement',
-  incen:    'Sales Team Incentives',
-  lmt:      'LMT Stores',
-  ws:       'WS Stores',
-  stands:   'Stands Outlets',
-  top20:    'Top N Outlets'
-};
-
-/* ─── Navigation ─────────────────────────────────────────── */
-function switchReport(id) {
-  currentReport = id;
-  document.querySelectorAll('.report-page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => {
-    const isActive = n.dataset.report === id;
-    n.classList.toggle('active', isActive);
-    const icon = n.querySelector('.nav-icon svg');
-    if (icon) {
-      icon.setAttribute('stroke', isActive ? 'var(--blue)' : 'var(--text-muted)');
+    function initApp() {
+        populateFilters();
+        updateDashboard();
     }
-  });
-  const page = document.getElementById('page-' + id);
-  if (page) page.classList.add('active');
-  document.getElementById('headerReportName').textContent = REPORT_NAMES[id] || id;
-  if (id === 'overview') render();
-  closeExportMenu();
-}
 
-/* ─── Filters ────────────────────────────────────────────── */
-function initFilters() {
-  const categories = ['All', ...unique(allData.map(d => d['Category'] || d['category'] || '').filter(Boolean))];
-  const channels   = ['All', ...unique(allData.map(d => d['Channel']))];
+    // ─── Core Logic ──────────────────────────────────────────────
 
-  const catSel = document.getElementById('filterCategory');
-  const chnSel = document.getElementById('filterChannel');
+    function updateDashboard() {
+        state.distributor = document.getElementById('filterDistributor').value;
+        state.category = document.getElementById('filterCategory').value;
+        state.position = document.getElementById('filterPosition').value;
 
-  catSel.innerHTML = categories.map(c => `<option value="${c}">${c === 'All' ? 'All Categories' : c}</option>`).join('');
-  chnSel.innerHTML = channels.map(c =>   `<option value="${c}">${c === 'All' ? 'All Channels'   : c}</option>`).join('');
-}
+        const filtered = applyFilters(rawData);
+        calculateKPIs(filtered);
+        renderHeatmap(filtered);
 
-function applyFilters() {
-  currentCategory = document.getElementById('filterCategory').value;
-  currentChannel  = document.getElementById('filterChannel').value;
-  if (currentReport === 'overview') render();
-}
-
-function resetFilters() {
-  currentCategory = 'All';
-  currentChannel  = 'All';
-  currentMetric   = 'ctns';
-  document.getElementById('filterCategory').value = 'All';
-  document.getElementById('filterChannel').value  = 'All';
-  document.getElementById('btnCtns').classList.add('active');
-  document.getElementById('btnInv').classList.remove('active');
-  if (currentReport === 'overview') render();
-  showToast('Filters reset');
-}
-
-function setMetric(m) {
-  currentMetric = m;
-  document.getElementById('btnCtns').classList.toggle('active', m === 'ctns');
-  document.getElementById('btnInv').classList.toggle('active', m === 'invoices');
-  if (currentReport === 'overview') render();
-}
-
-function getFilteredData() {
-  return allData.filter(d => {
-    if (currentCategory !== 'All' && d['Category'] !== currentCategory) return false;
-    if (currentChannel  !== 'All' && d['Channel']  !== currentChannel)  return false;
-    return true;
-  });
-}
-
-/* ─── Main Render ────────────────────────────────────────── */
-function render() {
-  const data  = getFilteredData();
-  const dates = unique(data.map(d => d['Date'])).sort();
-  const obs   = unique(data.map(d => d['Order Booker Code'])).sort();
-
-  if (dates.length) {
-    const f = d => { const [y, m, day] = d.split('-'); return `${day}/${m}/${y}`; };
-    document.getElementById('dateRangeBadge').textContent =
-      dates.length === 1 ? f(dates[0]) : `${f(dates[0])} – ${f(dates[dates.length - 1])}`;
-  }
-
-  const catTxt = currentCategory === 'All' ? 'All Categories' : currentCategory;
-  const chnTxt = currentChannel  === 'All' ? 'All Channels'   : currentChannel;
-  document.getElementById('pageSubtitle').textContent =
-    `${data.length} records · ${obs.length} order booker${obs.length !== 1 ? 's' : ''} · ${dates.length} day${dates.length !== 1 ? 's' : ''} · ${catTxt} · ${chnTxt}`;
-
-  renderKPIs(data, dates, obs);
-  renderHeatmap(data, dates, obs);
-}
-
-/* ─── KPIs ───────────────────────────────────────────────── */
-function renderKPIs(data, dates, obs) {
-  const byDate   = groupBy(data, 'Date');
-  const dailyCtns  = dates.map(d => sum(byDate[d].map(r => r['Sales CTN'])));
-  const dailyInvs  = dates.map(d => unique(byDate[d].map(r => r['Invoice Number'])).length);
-  const dailyObs   = dates.map(d => unique(byDate[d].map(r => r['Order Booker Code'])).length);
-  const dailySku   = dates.map(d => {
-    const byOutlet = groupBy(byDate[d], 'Outlet Code');
-    const counts   = Object.values(byOutlet).map(rows => unique(rows.map(r => r['SKU Code'])).length);
-    return avg(counts);
-  });
-
-  const kpis = [
-    {
-      label: 'Avg Daily Volume',
-      value: avg(dailyCtns).toFixed(1) + ' CTN',
-      sub:   'Sales cartons per day',
-      gradient: 'linear-gradient(90deg, #4868A8, #6B8FC4)',
-      iconBg: 'rgba(72,104,168,0.1)',
-      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#4868A8" stroke-width="1.6">
-        <rect x="2" y="9" width="3" height="7" rx="1"/>
-        <rect x="7" y="6" width="3" height="10" rx="1"/>
-        <rect x="12" y="2" width="3" height="14" rx="1"/>
-      </svg>`
-    },
-    {
-      label: 'Avg Invoice Count',
-      value: avg(dailyInvs).toFixed(1),
-      sub:   'Unique invoices per day',
-      gradient: 'linear-gradient(90deg, #1C3D7A, #4868A8)',
-      iconBg: 'rgba(28,61,122,0.1)',
-      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#1C3D7A" stroke-width="1.6">
-        <rect x="3" y="1" width="12" height="16" rx="2"/>
-        <path d="M6 6h6M6 9h6M6 12h4" stroke-linecap="round"/>
-      </svg>`
-    },
-    {
-      label: 'Avg OB Operated',
-      value: avg(dailyObs).toFixed(1),
-      sub:   'Order bookers active / day',
-      gradient: 'linear-gradient(90deg, #059669, #34d399)',
-      iconBg: 'rgba(5,150,105,0.1)',
-      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#059669" stroke-width="1.6">
-        <circle cx="7" cy="6" r="3"/>
-        <path d="M1 16c0-3 2.5-5.5 6-5.5"/>
-        <circle cx="14" cy="7" r="2.5"/>
-        <path d="M11.5 16c0-2.5 1.5-4 3.5-4.5" stroke-linecap="round"/>
-      </svg>`
-    },
-    {
-      label: 'Avg SKU / Shop',
-      value: avg(dailySku).toFixed(1),
-      sub:   'Unique SKUs per outlet',
-      gradient: 'linear-gradient(90deg, #d97706, #fbbf24)',
-      iconBg: 'rgba(217,119,6,0.1)',
-      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#d97706" stroke-width="1.6">
-        <path d="M9 1L16 5v8L9 17 2 13V5z" stroke-linejoin="round"/>
-        <path d="M9 1v16M2 5l7 4 7-4" stroke-linecap="round"/>
-      </svg>`
+        document.getElementById('statusBadge').innerText = `${filtered.length} records active`;
     }
-  ];
 
-  document.getElementById('kpiGrid').innerHTML = kpis.map((k, i) => `
-    <div class="kpi-card anim anim-${i + 1}" style="--kpi-gradient:${k.gradient};">
-      <div class="kpi-icon-wrap" style="background:${k.iconBg};">${k.icon}</div>
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value">${k.value}</div>
-      <div class="kpi-sub">${k.sub}</div>
-    </div>
-  `).join('');
-}
-
-/* ─── Heatmap ────────────────────────────────────────────── */
-function renderHeatmap(data, dates, obs) {
-  const metricLabel = currentMetric === 'ctns' ? 'Sales CTN' : 'Invoice Count';
-  document.getElementById('hmSubtitle').textContent =
-    `${metricLabel} · ${obs.length} OB${obs.length !== 1 ? 's' : ''} × ${dates.length} date${dates.length !== 1 ? 's' : ''}`;
-
-  const matrix = obs.map(ob => dates.map(date => {
-    const rows = data.filter(r => r['Order Booker Code'] === ob && r['Date'] === date);
-    if (!rows.length) return null;
-    if (currentMetric === 'ctns') return sum(rows.map(r => r['Sales CTN']));
-    return unique(rows.map(r => r['Invoice Number'])).length;
-  }));
-
-  const rowTotals = matrix.map(row => sum(row.filter(v => v !== null)));
-  const flat = matrix.flat().filter(v => v !== null);
-  const minV = flat.length ? Math.min(...flat) : 0;
-  const maxV = flat.length ? Math.max(...flat) : 1;
-
-  if (!flat.length) {
-    document.getElementById('hmContainer').innerHTML =
-      '<div class="state-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9 9h.01M15 9h.01M9 15h6" stroke-linecap="round"/></svg><span>No data matches the current filters.</span></div>';
-    return;
-  }
-
-  let html = `<table class="hm-table">
-    <thead><tr>
-      <th class="row-header">OB Code</th>
-      ${dates.map(d => `<th>${fmtDate(d)}</th>`).join('')}
-      <th>Total</th>
-    </tr></thead>
-    <tbody>`;
-
-  obs.forEach((ob, oi) => {
-    html += `<tr><td class="ob-cell">${ob}</td>`;
-    dates.forEach((_, di) => {
-      const v = matrix[oi][di];
-      if (v === null) {
-        html += `<td class="hm-cell"><span class="cell-empty">—</span></td>`;
-      } else {
-        const t  = maxV === minV ? 0.5 : (v - minV) / (maxV - minV);
-        const bg = rdYlGn(t);
-        const tc = textColor(bg);
-        const display = currentMetric === 'ctns' ? fmt(v, 2) : v;
-        html += `<td class="hm-cell"><span class="cell-box" style="background:${bg};color:${tc}" title="${ob} · ${dates[di]} · ${display}">${display}</span></td>`;
-      }
-    });
-    const rt = rowTotals[oi];
-    html += `<td class="total-cell"><span class="total-box">${currentMetric === 'ctns' ? fmt(rt, 2) : rt}</span></td>`;
-    html += `</tr>`;
-  });
-
-  html += `<tr><td class="ob-cell" style="font-weight:700;color:var(--text-muted);">Total</td>`;
-  dates.forEach((_, di) => {
-    const colVals = matrix.map(row => row[di]).filter(v => v !== null);
-    const colSum  = sum(colVals);
-    html += `<td class="total-cell"><span class="total-box" style="font-weight:700;">${currentMetric === 'ctns' ? fmt(colSum, 2) : colSum}</span></td>`;
-  });
-  const grand = sum(rowTotals);
-  html += `<td class="total-cell"><span class="total-box" style="font-weight:800;border-color:var(--blue);color:var(--blue);">${currentMetric === 'ctns' ? fmt(grand, 2) : grand}</span></td>`;
-  html += `</tr></tbody></table>`;
-
-  document.getElementById('hmContainer').innerHTML = html;
-}
-
-/* ─── Export Menu ────────────────────────────────────────── */
-function toggleExportMenu() {
-  document.getElementById('exportMenu').classList.toggle('open');
-}
-function closeExportMenu() {
-  document.getElementById('exportMenu').classList.remove('open');
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('.hdr-export-wrap')) closeExportMenu();
-});
-
-/* ─── Export Excel ───────────────────────────────────────── */
-function exportExcel() {
-  closeExportMenu();
-  const data = getFilteredData();
-  if (!data.length) { showToast('No data to export', true); return; }
-
-  const headers = Object.keys(data[0]);
-  const rows = [headers, ...data.map(r => headers.map(h => r[h]))];
-  const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `bunnys-${REPORT_NAMES[currentReport].replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Excel export ready ✓');
-}
-
-/* ─── Export Image ───────────────────────────────────────── */
-function exportImage() {
-  closeExportMenu();
-  showToast('Generating image snapshot…');
-  const target = document.getElementById('mainContent');
-  html2canvas(target, {
-    backgroundColor: '#E8F0FA',
-    scale: 2,
-    useCORS: true,
-    logging: false
-  }).then(canvas => {
-    const url = canvas.toDataURL('image/png');
-    const a   = document.createElement('a');
-    a.href    = url;
-    a.download = `bunnys-dashboard-${new Date().toISOString().slice(0, 10)}.png`;
-    a.click();
-    showToast('Image exported ✓');
-  }).catch(() => showToast('Image export failed', true));
-}
-
-/* ─── Load Data ──────────────────────────────────────────── */
-fetch('data.json')
-  .then(r => r.json())
-  .then(data => {
-    allData = data;
-    initFilters();
-    render();
-  })
-  .catch(() => {
-    // Inject demo data so dashboard is functional without a server
-    allData = generateDemoData();
-    initFilters();
-    render();
-    document.getElementById('dateRangeBadge').textContent = 'Demo Mode';
-  });
-
-/* ─── Demo Data Generator ────────────────────────────────── */
-function generateDemoData() {
-  const obs      = ['OB-101', 'OB-102', 'OB-103', 'OB-104', 'OB-105', 'OB-106'];
-  const channels = ['LMT', 'WS', 'Stands'];
-  const cats     = ['Beverages', 'Snacks', 'Dairy'];
-  const skus     = ['SKU-A1', 'SKU-A2', 'SKU-B1', 'SKU-B2', 'SKU-C1'];
-  const outlets  = Array.from({ length: 30 }, (_, i) => `OUT-${String(i + 1).padStart(3, '0')}`);
-  const rows = [];
-  for (let day = 1; day <= 10; day++) {
-    const date = `2025-01-${String(day).padStart(2, '0')}`;
-    obs.forEach(ob => {
-      const nInvoices = 3 + Math.floor(Math.random() * 6);
-      for (let i = 0; i < nInvoices; i++) {
-        rows.push({
-          'Date': date,
-          'Order Booker Code': ob,
-          'Channel': channels[Math.floor(Math.random() * channels.length)],
-          'Category': cats[Math.floor(Math.random() * cats.length)],
-          'Outlet Code': outlets[Math.floor(Math.random() * outlets.length)],
-          'Invoice Number': `INV-${date}-${ob}-${i}`,
-          'SKU Code': skus[Math.floor(Math.random() * skus.length)],
-          'Sales CTN': +(10 + Math.random() * 90).toFixed(2)
+    function applyFilters(data) {
+        return data.filter(d => {
+            const matchDist = state.distributor === 'All' || d.Distributor === state.distributor;
+            const matchCat = state.category === 'All' || d.Category === state.category;
+            // Simulated Position logic for demo
+            const matchPos = state.position === 'All' || (d.Position || 'Mid') === state.position;
+            return matchDist && matchCat && matchPos;
         });
-      }
-    });
-  }
-  return rows;
-}
+    }
+
+    function calculateKPIs(data) {
+        if (!data.length) return;
+
+        const dates = [...new Set(data.map(d => d.Date))];
+        const dayCount = dates.length || 1;
+
+        // 1. Sales in Ctns (Avg/Day)
+        const totalCtns = data.reduce((sum, d) => sum + (d['Sales CTN'] || 0), 0);
+        document.getElementById('kpi-ctns').innerText = (totalCtns / dayCount).toFixed(2);
+
+        // 2. Bills Avg / Day
+        const totalBills = [...new Set(data.map(d => d['Invoice Number']))].length;
+        document.getElementById('kpi-bills').innerText = Math.round(totalBills / dayCount);
+
+        // 3. No of OBs (Avg/Day)
+        const obsPerDay = dates.map(date => {
+            return [...new Set(data.filter(d => d.Date === date).map(d => d['Order Booker Code']))].length;
+        });
+        const avgObs = obsPerDay.reduce((a,b) => a+b, 0) / dayCount;
+        document.getElementById('kpi-obs').innerText = Math.round(avgObs);
+
+        // 4. Sku/Shop (Avg)
+        const outletGroups = groupBy(data, 'Outlet Code');
+        const skuPerOutlet = Object.values(outletGroups).map(rows => [...new Set(rows.map(r => r['SKU Code']))].length);
+        const avgSku = skuPerOutlet.length ? (skuPerOutlet.reduce((a,b) => a+b, 0) / skuPerOutlet.length) : 0;
+        document.getElementById('kpi-sku').innerText = avgSku.toFixed(1);
+    }
+
+    function renderHeatmap(data) {
+        const thead = document.getElementById('theadRow');
+        const tbody = document.getElementById('tbodyData');
+        
+        const dates = [...new Set(data.map(d => d.Date))].sort();
+        const obs = [...new Set(data.map(d => d['Order Booker Code']))].sort();
+
+        // Build Header
+        thead.innerHTML = '<th class="row-label">Order Booker</th>' + 
+            dates.map(d => `<th>${d.split('-').slice(1).join('/')}</th>`).join('') +
+            '<th>Total</th>';
+
+        // Map Data
+        const matrix = obs.map(ob => {
+            const rowData = { ob, dates: {}, total: 0 };
+            dates.forEach(date => {
+                const val = data.filter(d => d['Order Booker Code'] === ob && d.Date === date)
+                                .reduce((s, r) => s + (r['Sales CTN'] || 0), 0);
+                rowData.dates[date] = val;
+                rowData.total += val;
+            });
+            return rowData;
+        });
+
+        const maxVal = Math.max(...matrix.flatMap(r => Object.values(r.dates)), 1);
+
+        // Build Body
+        tbody.innerHTML = matrix.map(row => `
+            <tr>
+                <td class="row-label">${row.ob}</td>
+                ${dates.map(d => {
+                    const v = row.dates[d];
+                    const intensity = v / maxVal;
+                    const bg = v > 0 ? getHeatColor(intensity) : 'transparent';
+                    const color = intensity > 0.6 ? 'white' : 'var(--text-main)';
+                    return `<td><div class="cell-value" style="background:${bg}; color:${color}">${v > 0 ? v.toFixed(1) : '-'}</div></td>`;
+                }).join('')}
+                <td style="font-weight:700">${row.total.toFixed(1)}</td>
+            </tr>
+        `).join('');
+    }
+
+    // ─── Helpers ────────────────────────────────────────────────
+
+    function getHeatColor(t) {
+        // Simple PBI-style Blue gradient
+        const r = Math.floor(235 - (235 - 0) * t);
+        const g = Math.floor(242 - (242 - 90) * t);
+        const b = Math.floor(250 - (250 - 158) * t);
+        return `rgb(${r},${g},${b})`;
+    }
+
+    function populateFilters() {
+        const distributors = [...new Set(rawData.map(d => d.Distributor).filter(Boolean))].sort();
+        const categories = [...new Set(rawData.map(d => d.Category).filter(Boolean))].sort();
+        
+        const distSel = document.getElementById('filterDistributor');
+        distributors.forEach(d => distSel.add(new Option(d, d)));
+
+        const catSel = document.getElementById('filterCategory');
+        categories.forEach(c => catSel.add(new Option(c, c)));
+    }
+
+    function toggleSection(id) {
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    function toggleTheme() {
+        state.theme = state.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', state.theme);
+    }
+
+    function groupBy(arr, key) {
+        return arr.reduce((m, v) => { (m[v[key]] = m[v[key]] || []).push(v); return m; }, {});
+    }
+
+    function exportData() {
+        const filtered = applyFilters(rawData);
+        const csv = [
+            Object.keys(filtered[0]).join(','),
+            ...filtered.map(row => Object.values(row).join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales_export_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+    }
+
+    function generateDemoData() {
+        const obs = ['OB-Ahmad', 'OB-Zubair', 'OB-Kashif', 'OB-Bilal', 'OB-Sami'];
+        const cats = ['Beverages', 'Snacks', 'Confectionery'];
+        const dists = ['Mega Dist A', 'Mega Dist B'];
+        const data = [];
+        const today = new Date();
+
+        for(let i=0; i<10; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+
+            obs.forEach(ob => {
+                if(Math.random() > 0.2) {
+                    data.push({
+                        "Date": dateStr,
+                        "Order Booker Code": ob,
+                        "Distributor": dists[Math.floor(Math.random()*dists.length)],
+                        "Category": cats[Math.floor(Math.random()*cats.length)],
+                        "Position": Math.random() > 0.5 ? 'Top' : 'Mid',
+                        "Invoice Number": "INV-" + Math.random().toString(36).substr(2, 5).toUpperCase(),
+                        "Outlet Code": "OUT-" + (100 + Math.floor(Math.random()*20)),
+                        "SKU Code": "SKU-" + Math.floor(Math.random()*5),
+                        "Sales CTN": Math.floor(Math.random()*50) + 10
+                    });
+                }
+            });
+        }
+        return data;
+    }
 </script>
 </body>
 </html>
