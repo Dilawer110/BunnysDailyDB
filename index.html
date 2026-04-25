@@ -9,18 +9,18 @@
     <style>
         :root {
             /* Power BI Standard Palette */
-            --bg-app: #f3f2f1; /* PBI Light Gray */
+            --bg-app: #f3f2f1;
             --bg-card: #ffffff;
             --bg-sidebar: #ffffff;
-            --bg-header: #12239e; /* PBI Signature Blue */
+            --bg-header: #12239e; /* PBI Blue */
             --text-main: #252423;
             --text-sub: #605e5c;
             --border: #edebe9;
             --accent: #12239e; 
-            --pbi-yellow: #f2c811; /* PBI Gold/Yellow */
-            --header-h: 44px;
+            --pbi-yellow: #f2c811; /* PBI Gold */
+            --header-h: 46px;
             --sidebar-w: 230px;
-            --radius: 2px; /* PBI uses sharper corners */
+            --radius: 2px;
             --shadow: 0 1.6px 3.6px 0 rgba(0,0,0,.132), 0 .3px .9px 0 rgba(0,0,0,.108);
             --transition: all 0.15s ease;
         }
@@ -92,14 +92,11 @@
             border-radius: 2px;
             color: white;
             font-size: 11px;
-            font-weight: 400;
             outline: none;
             cursor: pointer;
             padding: 2px 6px;
-            min-width: 110px;
+            min-width: 100px;
         }
-
-        .filter-pill select option { background: #1b1b1b; color: white; }
 
         .header-actions { display: flex; align-items: center; gap: 8px; }
 
@@ -185,8 +182,33 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center;
+            background: #fcfcfc;
         }
-        .visual-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .visual-title { font-size: 13px; font-weight: 600; color: var(--text-main); }
+        
+        .metric-selector {
+            display: flex;
+            background: #eee;
+            padding: 2px;
+            border-radius: 4px;
+            gap: 2px;
+        }
+        .metric-btn {
+            padding: 4px 10px;
+            border: none;
+            font-size: 10px;
+            font-weight: 600;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 3px;
+            color: var(--text-sub);
+        }
+        .metric-btn.active {
+            background: white;
+            color: var(--accent);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
         .table-wrap { flex: 1; overflow: auto; padding: 12px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -201,10 +223,19 @@
             text-align: center;
         }
         td { padding: 4px; border: 1px solid var(--border); text-align: center; }
-        .row-label { text-align: left; font-weight: 600; padding-left: 10px; background: #fafafa; }
+        .row-label { text-align: left; font-weight: 600; padding-left: 10px; background: #fafafa; min-width: 150px; }
         
-        .total-row { background: #f3f2f1; font-weight: 700; }
-        .total-row td { border-top: 2px solid var(--text-sub); }
+        .total-row { background: #f3f2f1; font-weight: 700; color: var(--text-main); }
+        .total-row td { border-top: 2px solid #bbb; }
+        .total-row .manager-badge { 
+            background: var(--accent); 
+            color: white; 
+            padding: 2px 6px; 
+            border-radius: 2px; 
+            font-size: 9px; 
+            margin-left: 8px;
+            text-transform: uppercase;
+        }
 
         .cell-value { 
             width: 100%; 
@@ -217,16 +248,12 @@
             border-radius: 1px;
         }
 
-        /* ─── Buttons ──────────────────────────────────────────── */
+        /* ─── Utils ────────────────────────────────────────────── */
         .icon-btn { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px; cursor: pointer; display: flex; align-items: center; border-radius: 2px; }
         .icon-btn:hover { background: rgba(255,255,255,0.1); }
-        .chevron { transition: var(--transition); width: 12px; height: 12px; }
-
         .page { display: none; flex-direction: column; gap: 16px; height: 100%; }
         .page.active { display: flex; }
-
         .placeholder-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border); text-align: center; padding: 40px; }
-        .placeholder-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
         .btn-primary { background: var(--accent); color: white; border: none; padding: 8px 20px; font-weight: 600; cursor: pointer; }
     </style>
 </head>
@@ -267,16 +294,15 @@
     </div>
 
     <div class="header-actions">
-        <button class="icon-btn" onclick="toggleTheme()" title="Theme"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/><path d="M7 1v1M7 12v1M1 7h1M12 7h1"/></svg></button>
-        <button class="icon-btn" onclick="exportImage()" title="Export Image"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10l5 5 5-5M7 15V3"/><path d="M1 12v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke-linecap="round"/></svg></button>
-        <button class="icon-btn" onclick="exportCSV()" title="Export CSV"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h12v10H1V3zM4 6h6M4 8h6M4 10h4"/></svg></button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/><path d="M7 1v1M7 12v1"/></svg></button>
+        <button class="icon-btn" onclick="exportImage()" title="Export Dashboard"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10l5 5 5-5M7 15V3"/><path d="M1 12v2a1 1 0 001 1h10a1 1 0 001-1v-2"/></svg></button>
     </div>
 </header>
 
 <div class="app-container">
     <aside>
         <div class="nav-section open" id="sect1">
-            <div class="nav-header" onclick="toggleSection('sect1')">MAIN OVERVIEW <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
+            <div class="nav-header" onclick="toggleSection('sect1')">MAIN OVERVIEW <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
                 <div class="nav-item active" onclick="switchReport('Performance Overview')">Performance Overview</div>
                 <div class="nav-item" onclick="switchReport('Target vs Achievement')">Target vs Achievement</div>
@@ -284,7 +310,7 @@
             </div>
         </div>
         <div class="nav-section open" id="sect2">
-            <div class="nav-header" onclick="toggleSection('sect2')">CHANNELS <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
+            <div class="nav-header" onclick="toggleSection('sect2')">CHANNELS <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
                 <div class="nav-item" onclick="switchReport('LMT Stores')">LMT Stores</div>
                 <div class="nav-item" onclick="switchReport('WS Stores')">WS Stores</div>
@@ -292,7 +318,7 @@
             </div>
         </div>
         <div class="nav-section open" id="sect3">
-            <div class="nav-header" onclick="toggleSection('sect3')">RANKINGS <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
+            <div class="nav-header" onclick="toggleSection('sect3')">RANKINGS <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
                 <div class="nav-item" onclick="switchReport('Top N Outlets')">Top N Outlets</div>
                 <div class="nav-item" onclick="switchReport('OB Performance Rank')">OB Performance Rank</div>
@@ -309,16 +335,23 @@
                 <div class="kpi-card"><div class="kpi-label">Sku/Shop (Avg)</div><div class="kpi-value" id="kpi-sku">0.0</div></div>
             </div>
             <div class="visual-container">
-                <div class="visual-header"><div class="visual-title">OB Wise Daily Performance Matrix</div><div id="statusBadge" style="font-size: 10px; color: var(--text-sub);">Processing...</div></div>
+                <div class="visual-header">
+                    <div class="visual-title">Performance Matrix by Order Booker</div>
+                    <div id="statusBadge" style="font-size: 10px; color: var(--text-sub);">Processing...</div>
+                    <div class="metric-selector">
+                        <button class="metric-btn active" onclick="changeHeatmapMetric('ctn')">Sales CTN</button>
+                        <button class="metric-btn" onclick="changeHeatmapMetric('bills')">Bills Count</button>
+                        <button class="metric-btn" onclick="changeHeatmapMetric('sku_call')">SKUs per Call</button>
+                    </div>
+                </div>
                 <div class="table-wrap"><table id="heatmapTable"><thead><tr id="theadRow"></tr></thead><tbody id="tbodyData"></tbody></table></div>
             </div>
         </div>
 
         <div id="page-placeholder" class="page">
             <div class="placeholder-content">
-                <div class="placeholder-title" id="placeholderReportTitle">Report Under Construction</div>
-                <div class="placeholder-text">Module being finalized with live distributor data.</div>
-                <button class="btn-primary" onclick="switchReport('Performance Overview')">Go Back</button>
+                <div class="placeholder-title" id="placeholderReportTitle">Under Construction</div>
+                <button class="btn-primary" onclick="switchReport('Performance Overview')">Return</button>
             </div>
         </div>
     </main>
@@ -326,7 +359,7 @@
 
 <script>
     let rawData = [];
-    let state = { theme: 'light', distributor: 'All', channel: 'All', category: 'All', position: 'All' };
+    let state = { theme: 'light', distributor: 'All', channel: 'All', category: 'All', position: 'All', currentHeatmapMetric: 'ctn' };
 
     window.onload = () => {
         fetch('data.json').then(res => res.json()).then(data => { rawData = data; initApp(); })
@@ -335,12 +368,13 @@
 
     function initApp() { populateFilters(); updateDashboard(); }
 
-    function switchReport(name) {
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.innerText === name));
-        const isOverview = name === 'Performance Overview';
-        document.getElementById('page-overview').classList.toggle('active', isOverview);
-        document.getElementById('page-placeholder').classList.toggle('active', !isOverview);
-        if (!isOverview) document.getElementById('placeholderReportTitle').innerText = name;
+    function changeHeatmapMetric(m) {
+        state.currentHeatmapMetric = m;
+        document.querySelectorAll('.metric-btn').forEach(b => {
+            const isMatch = b.getAttribute('onclick').includes(`'${m}'`);
+            b.classList.toggle('active', isMatch);
+        });
+        renderHeatmap(applyFilters(rawData));
     }
 
     function populateFilters() {
@@ -361,134 +395,171 @@
         categories.forEach(c => catSel.add(new Option(c, c)));
     }
 
-    function updateDashboard() {
-        state.distributor = document.getElementById('filterDistributor').value;
-        state.channel = document.getElementById('filterChannel').value;
-        state.category = document.getElementById('filterCategory').value;
-        state.position = document.getElementById('filterPosition').value;
-
-        const filtered = rawData.filter(d => {
+    function applyFilters(data) {
+        return data.filter(d => {
             const mDist = state.distributor === 'All' || d["Distributor Name"] === state.distributor;
             const mChan = state.channel === 'All' || d["Channel"] === state.channel;
             const mCat = state.category === 'All' || d.Category === state.category;
             const mPos = state.position === 'All' || (d.Position || 'Mid') === state.position;
             return mDist && mChan && mCat && mPos;
         });
+    }
 
+    function updateDashboard() {
+        state.distributor = document.getElementById('filterDistributor').value;
+        state.channel = document.getElementById('filterChannel').value;
+        state.category = document.getElementById('filterCategory').value;
+        state.position = document.getElementById('filterPosition').value;
+
+        const filtered = applyFilters(rawData);
         calculateKPIs(filtered);
         renderHeatmap(filtered);
-        document.getElementById('statusBadge').innerText = `${filtered.length} active records`;
+        
+        const statusEl = document.getElementById('statusBadge');
+        if (statusEl) statusEl.innerText = `${filtered.length} active records`;
     }
 
     function calculateKPIs(data) {
         const dates = [...new Set(data.map(d => d.Date))];
         const dayCount = dates.length || 1;
+        
         const totalCtns = data.reduce((s, d) => s + (parseFloat(d['Sales CTN']) || 0), 0);
         document.getElementById('kpi-ctns').innerText = (totalCtns / dayCount).toFixed(2);
+
         const totalBills = [...new Set(data.map(d => d['Invoice Number']))].length;
         document.getElementById('kpi-bills').innerText = Math.round(totalBills / dayCount);
-        const obsPerDay = dates.map(dt => [...new Set(data.filter(d => d.Date === dt).map(d => d['Order Booker Code']))].length);
+
+        const obsPerDay = dates.map(dt => [...new Set(data.filter(d => d.Date === dt).map(d => d['Order Booker Name']))].length);
         document.getElementById('kpi-obs').innerText = Math.round(obsPerDay.reduce((a,b)=>a+b,0)/dayCount || 0);
+
         const shops = Object.values(data.reduce((m,v)=>{(m[v['Outlet Code']]=m[v['Outlet Code']]||[]).push(v);return m;},{}));
         const avgSku = shops.length ? (shops.map(s => [...new Set(s.map(r=>r['SKU Code']))].length).reduce((a,b)=>a+b,0)/shops.length) : 0;
         document.getElementById('kpi-sku').innerText = avgSku.toFixed(1);
-    }
-
-    function getContrastColor(hexColor) {
-        if (!hexColor || hexColor === 'transparent') return 'inherit';
-        const r = parseInt(hexColor.slice(5, 7), 10) || 0; // Rough extraction from rgba or dynamic string
-        // Since we are using rgba(0, 90, 158, t), let's simplify contrast
-        return 'inherit'; 
     }
 
     function renderHeatmap(data) {
         const thead = document.getElementById('theadRow');
         const tbody = document.getElementById('tbodyData');
         const dates = [...new Set(data.map(d => d.Date))].sort();
-        const obs = [...new Set(data.map(d => d['Order Booker Code']))].sort();
+        const obs = [...new Set(data.map(d => d['Order Booker Name']))].sort();
 
-        if(!dates.length) { tbody.innerHTML = '<tr><td colspan="30" style="padding:40px">No data</td></tr>'; return; }
+        if(!dates.length) { tbody.innerHTML = '<tr><td colspan="30" style="padding:40px">No records found matching these filters</td></tr>'; return; }
 
-        thead.innerHTML = '<th>Order Booker</th>' + dates.map(d => `<th>${d.split('-').slice(1).reverse().join('/')}</th>`).join('') + '<th>Total</th>';
-
-        const dateTotals = {};
-        dates.forEach(d => dateTotals[d] = 0);
-        let grandTotal = 0;
+        thead.innerHTML = '<th>Order Booker Name</th>' + dates.map(d => `<th>${d.split('-').slice(1).reverse().join('/')}</th>`).join('') + '<th>Total</th>';
 
         const matrix = obs.map(ob => {
-            const row = { ob, vals: {}, total: 0 };
+            const row = { name: ob, vals: {}, total: 0 };
             dates.forEach(d => {
-                const v = data.filter(r => r['Order Booker Code']===ob && r.Date===d).reduce((s,r)=>s+(parseFloat(r['Sales CTN'])||0),0);
-                row.vals[d] = v; row.total += v;
-                dateTotals[d] += v;
-                grandTotal += v;
+                const dayRows = data.filter(r => r['Order Booker Name']===ob && r.Date===d);
+                let val = 0;
+                if (state.currentHeatmapMetric === 'ctn') {
+                    val = dayRows.reduce((s,r)=>s+(parseFloat(r['Sales CTN'])||0), 0);
+                } else if (state.currentHeatmapMetric === 'bills') {
+                    val = [...new Set(dayRows.map(r => r['Invoice Number']))].length;
+                } else if (state.currentHeatmapMetric === 'sku_call') {
+                    const invoices = [...new Set(dayRows.map(r => r['Invoice Number']))].length;
+                    val = invoices > 0 ? dayRows.length / invoices : 0;
+                }
+                row.vals[d] = val;
             });
+            const obRows = data.filter(r => r['Order Booker Name'] === ob);
+            if (state.currentHeatmapMetric === 'sku_call') {
+                const totalInvs = [...new Set(obRows.map(r => r['Invoice Number']))].length;
+                row.total = totalInvs > 0 ? obRows.length / totalInvs : 0;
+            } else if (state.currentHeatmapMetric === 'bills') {
+                row.total = [...new Set(obRows.map(r => r['Invoice Number']))].length;
+            } else {
+                row.total = obRows.reduce((s,r)=>s+(parseFloat(r['Sales CTN'])||0), 0);
+            }
             return row;
         });
 
-        const max = Math.max(...matrix.flatMap(r => Object.values(r.vals)), 1);
+        const allVals = matrix.flatMap(r => Object.values(r.vals));
+        const max = Math.max(...allVals, 1);
 
         let html = matrix.map(row => `
             <tr>
-                <td class="row-label">${row.ob}</td>
+                <td class="row-label">${row.name}</td>
                 ${dates.map(d => {
-                    const v = row.vals[d]; const t = v/max;
-                    const bg = v > 0 ? `rgba(18, 35, 158, ${0.1 + t*0.8})` : 'transparent';
-                    const color = t > 0.5 ? 'white' : 'var(--text-main)';
-                    return `<td><div class="cell-value" style="background:${bg}; color:${color}">${v>0?v.toFixed(2):'-'}</div></td>`;
+                    const v = row.vals[d]; const t = max > 0 ? v/max : 0;
+                    const bg = v > 0 ? `rgba(18, 35, 158, ${0.15 + t*0.8})` : 'transparent';
+                    const color = t > 0.4 ? 'white' : 'inherit';
+                    return `<td><div class="cell-value" style="background:${bg}; color:${color}">${v>0?v.toFixed(state.currentHeatmapMetric==='bills'?0:2):'-'}</div></td>`;
                 }).join('')}
-                <td style="font-weight:700">${row.total.toFixed(2)}</td>
+                <td style="font-weight:700">${row.total.toFixed(state.currentHeatmapMetric==='bills'?0:2)}</td>
             </tr>
         `).join('');
 
-        // ADD GRAND TOTAL ROW
-        html += `
-            <tr class="total-row">
-                <td class="row-label">Grand Total</td>
-                ${dates.map(d => `<td>${dateTotals[d].toFixed(2)}</td>`).join('')}
-                <td>${grandTotal.toFixed(2)}</td>
-            </tr>
-        `;
+        // Dynamic Manager Row Logic
+        let managerName = "Hunain Ali"; // Default Grand Total
+        if (state.distributor !== 'All' && data.length > 0) {
+            // SELECTEDVALUE(Distributor[Manager Name])
+            managerName = data[0]["Manager Name"] || "Unknown Manager";
+        }
 
-        tbody.innerHTML = html;
+        let totalRowHtml = `<tr class="total-row"><td class="row-label">${managerName} <span class="manager-badge">Manager</span></td>`;
+        let grandTotalVal = 0;
+        
+        dates.forEach(d => {
+            const dayRows = data.filter(r => r.Date === d);
+            let val = 0;
+            if (state.currentHeatmapMetric === 'ctn') val = dayRows.reduce((s,r)=>s+(parseFloat(r['Sales CTN'])||0), 0);
+            else if (state.currentHeatmapMetric === 'bills') val = [...new Set(dayRows.map(r => r['Invoice Number']))].length;
+            else if (state.currentHeatmapMetric === 'sku_call') {
+                const invs = [...new Set(dayRows.map(r => r['Invoice Number']))].length;
+                val = invs > 0 ? dayRows.length / invs : 0;
+            }
+            totalRowHtml += `<td>${val.toFixed(state.currentHeatmapMetric==='bills'?0:2)}</td>`;
+        });
+
+        if (state.currentHeatmapMetric === 'ctn') grandTotalVal = data.reduce((s,r)=>s+(parseFloat(r['Sales CTN'])||0), 0);
+        else if (state.currentHeatmapMetric === 'bills') grandTotalVal = [...new Set(data.map(r => r['Invoice Number']))].length;
+        else if (state.currentHeatmapMetric === 'sku_call') {
+            const invs = [...new Set(data.map(r => r['Invoice Number']))].length;
+            grandTotalVal = invs > 0 ? data.length / invs : 0;
+        }
+
+        totalRowHtml += `<td>${grandTotalVal.toFixed(state.currentHeatmapMetric==='bills'?0:2)}</td></tr>`;
+        tbody.innerHTML = html + totalRowHtml;
     }
 
     function toggleSection(id) { document.getElementById(id).classList.toggle('open'); }
     function toggleTheme() { state.theme = state.theme==='light'?'dark':'light'; document.documentElement.setAttribute('data-theme', state.theme); }
-
-    function exportCSV() {
-        const filtered = rawData.filter(d => {
-            const mDist = state.distributor === 'All' || d["Distributor Name"] === state.distributor;
-            const mChan = state.channel === 'All' || d["Channel"] === state.channel;
-            const mCat = state.category === 'All' || d.Category === state.category;
-            return mDist && mChan && mCat;
-        });
-        if(!filtered.length) return;
-        const csv = [Object.keys(filtered[0]).join(','), ...filtered.map(row => Object.values(row).map(v => `"${v}"`).join(','))].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `bunny_sales_export.csv`;
-        a.click();
+    function switchReport(name) {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.innerText === name));
+        const isOverview = name === 'Performance Overview';
+        document.getElementById('page-overview').classList.toggle('active', isOverview);
+        document.getElementById('page-placeholder').classList.toggle('active', !isOverview);
+        if(!isOverview) document.getElementById('placeholderReportTitle').innerText = name;
     }
 
     function exportImage() {
         const area = document.getElementById('capture-area');
         html2canvas(area, { backgroundColor: state.theme === 'light' ? '#f3f2f1' : '#111111', scale: 2 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'daily_sales_snapshot.png';
+            link.download = 'sales_dashboard_snapshot.png';
             link.href = canvas.toDataURL();
             link.click();
         });
     }
 
     function generateDemoData() {
-        const obs=['OB1', 'OB2', 'OB3'], cats=['Nimko','Chips'], dists=['A&H Enterprises'], data=[];
-        for(let i=0; i<60; i++) {
+        const names=['Atif Mehmood', 'Zeeshan Khan', 'M. Ali'], cats=['Nimko','Chips','Nuts'], dists=['Rauf Sons', 'Hammad Traders'];
+        const managers={'Rauf Sons': 'Ahmed Raza', 'Hammad Traders': 'Sara Khan'};
+        const data=[];
+        for(let i=0; i<80; i++) {
+            const dName = dists[i%2];
             data.push({
-                "Distributor Name": dists[0], "Order Booker Code": obs[i%3], "Category": cats[i%2], "Channel": i%3===0?"LMT":"Retail",
-                "Invoice Number": "INV"+i, "Outlet Code": "OUT"+(i%8), "SKU Code": "SKU"+i,
-                "Date": "2026-04-0" + (Math.floor(i/10)+1), "Sales CTN": Math.random()*20
+                "Distributor Name": dName, 
+                "Manager Name": managers[dName],
+                "Order Booker Name": names[i%3], 
+                "Category": cats[i%3], 
+                "Channel": i%4===0?"Retail":"WS",
+                "Invoice Number": "D002-INV-"+(1000 + Math.floor(i/4)), 
+                "Outlet Code": "N-"+(5000+ (i%10)), 
+                "SKU Code": "SKU-"+(i%20),
+                "Date": "2026-04-0" + (Math.floor(i/15)+1), 
+                "Sales CTN": Math.random()*2
             });
         }
         return data;
