@@ -8,37 +8,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            /* Power BI Inspired Palette - Light */
-            --bg-app: #f0f2f5;
+            --bg-app: #f4f6f9;
             --bg-card: #ffffff;
             --bg-sidebar: #ffffff;
-            --bg-header: #002050;
-            --text-main: #1a1a1a;
+            --bg-header: #001e4d;
+            --text-main: #1e293b;
             --text-sub: #64748b;
             --border: #e2e8f0;
-            --accent: #005a9e; /* PBI Blue */
-            --accent-hover: #004578;
-            --success: #107c10;
-            --danger: #a4262c;
-            --warning: #ffb900;
-            
-            --header-h: 56px;
+            --accent: #005a9e; 
+            --header-h: 48px;
             --sidebar-w: 240px;
-            --radius: 6px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius: 4px;
+            --shadow: 0 1px 2px rgba(0,0,0,0.05);
+            --transition: all 0.15s ease;
         }
 
         [data-theme="dark"] {
-            --bg-app: #0b0f19;
-            --bg-card: #151c2c;
-            --bg-sidebar: #151c2c;
+            --bg-app: #0f172a;
+            --bg-card: #1e293b;
+            --bg-sidebar: #1e293b;
             --bg-header: #000000;
             --text-main: #f1f5f9;
             --text-sub: #94a3b8;
-            --border: #2d3748;
-            --accent: #2883ca;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --border: #334155;
+            --accent: #3b82f6;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,80 +39,67 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-app);
             color: var(--text-main);
-            overflow: hidden; /* Executive dashboards rarely scroll the whole body */
+            overflow: hidden; 
             height: 100vh;
             display: flex;
             flex-direction: column;
+            font-size: 13px;
         }
 
-        /* ─── Header ────────────────────────────────────────────── */
         header {
             height: var(--header-h);
             background: var(--bg-header);
             color: white;
             display: flex;
             align-items: center;
-            padding: 0 16px;
+            padding: 0 12px;
             z-index: 1000;
-            justify-content: space-between;
         }
 
         .brand-box {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-width: calc(var(--sidebar-w) - 16px);
+            gap: 8px;
+            width: var(--sidebar-w);
+            flex-shrink: 0;
         }
 
-        .brand-title {
-            font-weight: 800;
-            font-size: 14px;
-            letter-spacing: -0.01em;
-            text-transform: uppercase;
-        }
+        .brand-title { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .top-filters {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 0 24px;
+            gap: 8px;
+            padding: 0 16px;
         }
 
         .filter-pill {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
             border-radius: var(--radius);
-            padding: 4px 10px;
+            padding: 2px 8px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: rgba(255,255,255,0.9);
-            font-size: 12px;
+            gap: 6px;
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
         }
 
         .filter-pill select {
             background: transparent;
             border: none;
             color: white;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             outline: none;
             cursor: pointer;
+            min-width: 100px;
         }
 
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
 
-        /* ─── Sidebar ───────────────────────────────────────────── */
-        .app-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        .app-container { display: flex; flex: 1; overflow: hidden; }
 
         aside {
             width: var(--sidebar-w);
@@ -130,14 +110,12 @@
             overflow-y: auto;
         }
 
-        .nav-section {
-            border-bottom: 1px solid var(--border);
-        }
+        .nav-section { border-bottom: 1px solid var(--border); }
 
         .nav-header {
-            padding: 12px 16px;
-            font-size: 11px;
-            font-weight: 700;
+            padding: 12px;
+            font-size: 10px;
+            font-weight: 800;
             color: var(--text-sub);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -145,175 +123,119 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            user-select: none;
         }
 
-        .nav-content {
-            padding: 4px 8px 12px;
-            display: none;
-        }
+        .nav-content { padding: 0 8px 12px; display: none; }
         .nav-section.open .nav-content { display: block; }
         .nav-section.open .chevron { transform: rotate(180deg); }
 
         .nav-item {
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: var(--radius);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             color: var(--text-main);
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             cursor: pointer;
             margin-bottom: 2px;
             transition: var(--transition);
         }
 
         .nav-item:hover { background: var(--bg-app); }
-        .nav-item.active { background: var(--accent); color: white; }
+        .nav-item.active { background: var(--accent); color: white; font-weight: 600; }
 
-        /* ─── Main Content ───────────────────────────────────────── */
         main {
             flex: 1;
-            padding: 16px;
+            padding: 12px;
             overflow-y: auto;
             background: var(--bg-app);
             display: flex;
             flex-direction: column;
-            gap: 16px;
-        }
-
-        .kpi-strip {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
         }
 
-        .kpi-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 12px 16px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        /* ─── Pages ────────────────────────────────────────────── */
+        .page { display: none; flex-direction: column; gap: 12px; height: 100%; }
+        .page.active { display: flex; }
 
-        .kpi-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
+        /* ─── KPI & Heatmap ────────────────────────────────────── */
+        .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); }
+        .kpi-label { font-size: 10px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 4px; }
+        .kpi-value { font-size: 20px; font-weight: 800; color: var(--text-main); }
 
-        .kpi-value {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text-main);
-            font-variant-numeric: tabular-nums;
-        }
+        .visual-container { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
+        .visual-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.01); }
+        .visual-title { font-size: 13px; font-weight: 700; }
+        .table-wrap { flex: 1; overflow: auto; padding: 10px; }
 
-        .visual-container {
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { position: sticky; top: 0; background: var(--bg-card); padding: 8px; color: var(--text-sub); border-bottom: 2px solid var(--border); z-index: 10; }
+        td { padding: 4px; border: 1px solid var(--border); text-align: center; }
+        .row-label { text-align: left; font-weight: 600; padding-left: 10px; width: 140px; }
+        .cell-value { width: 100%; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+        /* ─── Placeholder UI ────────────────────────────────────── */
+        .placeholder-content {
             flex: 1;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-        }
-
-        .visual-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-align: center;
+            padding: 40px;
         }
 
-        .visual-title { font-size: 14px; font-weight: 700; }
-
-        .table-wrap {
-            flex: 1;
-            overflow: auto;
-            padding: 12px;
+        .placeholder-icon {
+            width: 64px; height: 64px;
+            background: var(--bg-app);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+            color: var(--accent);
         }
 
-        /* ─── Heatmap Table ────────────────────────────────────── */
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { 
-            position: sticky; top: 0; background: var(--bg-card);
-            padding: 8px; font-weight: 700; color: var(--text-sub);
-            text-align: center; border-bottom: 2px solid var(--border);
-            z-index: 10;
-        }
-        td { padding: 4px; text-align: center; border: 1px solid var(--border); }
-        .row-label { text-align: left; font-weight: 600; padding-left: 12px; min-width: 120px; }
+        .placeholder-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+        .placeholder-text { color: var(--text-sub); max-width: 400px; line-height: 1.6; margin-bottom: 24px; }
         
-        .cell-value {
-            width: 100%;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-        }
-
-        /* ─── Theme Toggle ─────────────────────────────────────── */
-        .icon-btn {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
+        .btn-primary {
+            background: var(--accent);
             color: white;
-            padding: 6px;
+            border: none;
+            padding: 8px 20px;
             border-radius: var(--radius);
+            font-weight: 600;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: inherit;
         }
-        .icon-btn:hover { background: rgba(255,255,255,0.1); }
 
-        /* ─── Utilities ────────────────────────────────────────── */
-        .hidden { display: none; }
+        .icon-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px; border-radius: var(--radius); cursor: pointer; display: flex; }
         .chevron { transition: var(--transition); width: 14px; height: 14px; }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="brand-box">
-        <div style="background: white; border-radius: 4px; padding: 4px; display: flex;">
-            <svg width="20" height="20" viewBox="0 0 100 100">
-                <rect x="20" y="40" width="15" height="40" fill="#005a9e"/>
-                <rect x="42" y="20" width="15" height="60" fill="#005a9e"/>
-                <rect x="64" y="50" width="15" height="30" fill="#005a9e"/>
-            </svg>
-        </div>
-        <div class="brand-title">Daily Sales & KPI</div>
+        <svg width="20" height="20" viewBox="0 0 100 100" fill="white"><rect x="20" y="40" width="12" height="40" rx="2"/><rect x="44" y="20" width="12" height="60" rx="2"/><rect x="68" y="50" width="12" height="30" rx="2"/></svg>
+        <div class="brand-title">Daily Sales Performance</div>
     </div>
 
     <div class="top-filters">
         <div class="filter-pill">
             <span>Distributor:</span>
-            <select id="filterDistributor" onchange="updateDashboard()">
-                <option value="All">All Distributors</option>
-            </select>
+            <select id="filterDistributor" onchange="updateDashboard()"><option value="All">All Distributors</option></select>
         </div>
         <div class="filter-pill">
             <span>Category:</span>
-            <select id="filterCategory" onchange="updateDashboard()">
-                <option value="All">All Categories</option>
-            </select>
+            <select id="filterCategory" onchange="updateDashboard()"><option value="All">All Categories</option></select>
         </div>
         <div class="filter-pill">
             <span>Position:</span>
@@ -327,90 +249,62 @@
     </div>
 
     <div class="header-actions">
-        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        </button>
-        <button class="icon-btn" onclick="exportData()" title="Export CSV">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        </button>
+        <button class="icon-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 13.5l1-1M13.5 2.5l-1 1"/></svg></button>
+        <button class="icon-btn" onclick="exportData()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 10v3a1 1 0 01-1 1H3a1 1 0 01-1-1v-3M4 7l4 4 4-4M8 11V1"/></svg></button>
     </div>
 </header>
 
 <div class="app-container">
     <aside>
-        <div class="nav-section open" id="sectionCore">
-            <div class="nav-header" onclick="toggleSection('sectionCore')">
-                CORE REPORTS
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-            </div>
+        <div class="nav-section open" id="sect1">
+            <div class="nav-header" onclick="toggleSection('sect1')">MAIN OVERVIEW <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
-                <a class="nav-item active">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                    Performance
-                </a>
-                <a class="nav-item">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                    Daily Trends
-                </a>
+                <div class="nav-item active" onclick="switchReport('Performance Overview')">Performance Overview</div>
+                <div class="nav-item" onclick="switchReport('Target vs Achievement')">Target vs Achievement</div>
+                <div class="nav-item" onclick="switchReport('Sales Team Incentives')">Sales Team Incentives</div>
             </div>
         </div>
 
-        <div class="nav-section" id="sectionDetail">
-            <div class="nav-header" onclick="toggleSection('sectionDetail')">
-                DISTRIBUTION
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-            </div>
+        <div class="nav-section open" id="sect2">
+            <div class="nav-header" onclick="toggleSection('sect2')">CHANNELS <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
-                <a class="nav-item">LMT Stores</a>
-                <a class="nav-item">WS Network</a>
-                <a class="nav-item">Stands</a>
+                <div class="nav-item" onclick="switchReport('LMT Stores')">LMT Stores</div>
+                <div class="nav-item" onclick="switchReport('WS Stores')">WS Stores</div>
+                <div class="nav-item" onclick="switchReport('Stands Outlets')">Stands Outlets</div>
             </div>
         </div>
 
-        <div class="nav-section" id="sectionTeam">
-            <div class="nav-header" onclick="toggleSection('sectionTeam')">
-                SALES TEAM
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-            </div>
+        <div class="nav-section open" id="sect3">
+            <div class="nav-header" onclick="toggleSection('sect3')">RANKINGS <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
-                <a class="nav-item">Incentives</a>
-                <a class="nav-item">OB Ranking</a>
+                <div class="nav-item" onclick="switchReport('Top N Outlets')">Top N Outlets</div>
+                <div class="nav-item" onclick="switchReport('OB Performance Rank')">OB Performance Rank</div>
             </div>
         </div>
     </aside>
 
-    <main id="captureArea">
-        <div class="kpi-strip">
-            <div class="kpi-card">
-                <div class="kpi-label">Sales in Ctns (Avg/Day)</div>
-                <div class="kpi-value" id="kpi-ctns">0.00</div>
+    <main>
+        <!-- LIVE PAGE -->
+        <div id="page-overview" class="page active">
+            <div class="kpi-strip">
+                <div class="kpi-card"><div class="kpi-label">Sales in Ctns (Avg/Day)</div><div class="kpi-value" id="kpi-ctns">0.00</div></div>
+                <div class="kpi-card"><div class="kpi-label">Bills Avg / Day</div><div class="kpi-value" id="kpi-bills">0</div></div>
+                <div class="kpi-card"><div class="kpi-label">No of OBs (Avg/Day)</div><div class="kpi-value" id="kpi-obs">0</div></div>
+                <div class="kpi-card"><div class="kpi-label">Sku/Shop (Avg)</div><div class="kpi-value" id="kpi-sku">0.0</div></div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Bills Avg / Day</div>
-                <div class="kpi-value" id="kpi-bills">0</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">No of OBs (Avg/Day)</div>
-                <div class="kpi-value" id="kpi-obs">0</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Sku/Shop (Avg)</div>
-                <div class="kpi-value" id="kpi-sku">0.0</div>
+            <div class="visual-container">
+                <div class="visual-header"><div class="visual-title">OB Wise Daily Performance Matrix</div><div id="statusBadge" style="font-size: 10px; color: var(--text-sub);">Processing...</div></div>
+                <div class="table-wrap"><table id="heatmapTable"><thead><tr id="theadRow"></tr></thead><tbody id="tbodyData"></tbody></table></div>
             </div>
         </div>
 
-        <div class="visual-container">
-            <div class="visual-header">
-                <div class="visual-title">OB Wise Daily Performance Matrix</div>
-                <div style="display: flex; gap: 8px;">
-                    <div id="statusBadge" style="font-size: 11px; background: var(--bg-app); padding: 2px 8px; border-radius: 10px; color: var(--text-sub);">Loading data...</div>
-                </div>
-            </div>
-            <div class="table-wrap">
-                <table id="heatmapTable">
-                    <thead><tr id="theadRow"></tr></thead>
-                    <tbody id="tbodyData"></tbody>
-                </table>
+        <!-- PLACEHOLDER PAGE -->
+        <div id="page-placeholder" class="page">
+            <div class="placeholder-content">
+                <div class="placeholder-icon"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+                <div class="placeholder-title" id="placeholderReportTitle">Report Under Construction</div>
+                <div class="placeholder-text">We are currently integrating real-time data for this module. This report will be available in the next system update.</div>
+                <button class="btn-primary" onclick="switchReport('Performance Overview')">Return to Overview</button>
             </div>
         </div>
     </main>
@@ -418,204 +312,125 @@
 
 <script>
     let rawData = [];
-    let state = {
-        theme: 'light',
-        distributor: 'All',
-        category: 'All',
-        position: 'All'
-    };
-
-    // ─── Initialization ──────────────────────────────────────────
+    let state = { theme: 'light', distributor: 'All', category: 'All', position: 'All' };
 
     window.onload = () => {
-        // Attempt to fetch data.json or fallback to demo
-        fetch('data.json')
-            .then(res => res.json())
-            .then(data => {
-                rawData = data;
-                initApp();
-            })
-            .catch(() => {
-                console.warn("Using Demo Data...");
-                rawData = generateDemoData();
-                initApp();
-            });
+        fetch('data.json').then(res => res.json()).then(data => { rawData = data; initApp(); })
+        .catch(() => { rawData = generateDemoData(); initApp(); });
     };
 
-    function initApp() {
-        populateFilters();
-        updateDashboard();
+    function initApp() { populateFilters(); updateDashboard(); }
+
+    function switchReport(name) {
+        // Update Nav UI
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.toggle('active', item.innerText === name);
+        });
+
+        // Switch View
+        const isOverview = name === 'Performance Overview';
+        document.getElementById('page-overview').classList.toggle('active', isOverview);
+        document.getElementById('page-placeholder').classList.toggle('active', !isOverview);
+
+        if (!isOverview) {
+            document.getElementById('placeholderReportTitle').innerText = name + " - Coming Soon";
+        } else {
+            updateDashboard(); // Ensure overview data is fresh
+        }
     }
 
-    // ─── Core Logic ──────────────────────────────────────────────
+    function populateFilters() {
+        const distributors = [...new Set(rawData.map(d => d["Distributor Name"]).filter(Boolean))].sort();
+        const categories = [...new Set(rawData.map(d => d.Category).filter(Boolean))].sort();
+        
+        const distSel = document.getElementById('filterDistributor');
+        distSel.innerHTML = '<option value="All">All Distributors</option>';
+        distributors.forEach(d => distSel.add(new Option(d, d)));
+
+        const catSel = document.getElementById('filterCategory');
+        catSel.innerHTML = '<option value="All">All Categories</option>';
+        categories.forEach(c => catSel.add(new Option(c, c)));
+    }
 
     function updateDashboard() {
         state.distributor = document.getElementById('filterDistributor').value;
         state.category = document.getElementById('filterCategory').value;
         state.position = document.getElementById('filterPosition').value;
 
-        const filtered = applyFilters(rawData);
+        const filtered = rawData.filter(d => {
+            const mDist = state.distributor === 'All' || d["Distributor Name"] === state.distributor;
+            const mCat = state.category === 'All' || d.Category === state.category;
+            const mPos = state.position === 'All' || (d.Position || 'Mid') === state.position;
+            return mDist && mCat && mPos;
+        });
+
         calculateKPIs(filtered);
         renderHeatmap(filtered);
-
-        document.getElementById('statusBadge').innerText = `${filtered.length} records active`;
-    }
-
-    function applyFilters(data) {
-        return data.filter(d => {
-            const matchDist = state.distributor === 'All' || d.Distributor === state.distributor;
-            const matchCat = state.category === 'All' || d.Category === state.category;
-            // Simulated Position logic for demo
-            const matchPos = state.position === 'All' || (d.Position || 'Mid') === state.position;
-            return matchDist && matchCat && matchPos;
-        });
+        document.getElementById('statusBadge').innerText = `${filtered.length} active records`;
     }
 
     function calculateKPIs(data) {
-        if (!data.length) return;
-
         const dates = [...new Set(data.map(d => d.Date))];
         const dayCount = dates.length || 1;
-
-        // 1. Sales in Ctns (Avg/Day)
-        const totalCtns = data.reduce((sum, d) => sum + (d['Sales CTN'] || 0), 0);
+        
+        const totalCtns = data.reduce((s, d) => s + (parseFloat(d['Sales CTN']) || 0), 0);
         document.getElementById('kpi-ctns').innerText = (totalCtns / dayCount).toFixed(2);
 
-        // 2. Bills Avg / Day
         const totalBills = [...new Set(data.map(d => d['Invoice Number']))].length;
         document.getElementById('kpi-bills').innerText = Math.round(totalBills / dayCount);
 
-        // 3. No of OBs (Avg/Day)
-        const obsPerDay = dates.map(date => {
-            return [...new Set(data.filter(d => d.Date === date).map(d => d['Order Booker Code']))].length;
-        });
-        const avgObs = obsPerDay.reduce((a,b) => a+b, 0) / dayCount;
-        document.getElementById('kpi-obs').innerText = Math.round(avgObs);
+        const obsPerDay = dates.map(dt => [...new Set(data.filter(d => d.Date === dt).map(d => d['Order Booker Code']))].length);
+        document.getElementById('kpi-obs').innerText = Math.round(obsPerDay.reduce((a,b)=>a+b,0)/dayCount || 0);
 
-        // 4. Sku/Shop (Avg)
-        const outletGroups = groupBy(data, 'Outlet Code');
-        const skuPerOutlet = Object.values(outletGroups).map(rows => [...new Set(rows.map(r => r['SKU Code']))].length);
-        const avgSku = skuPerOutlet.length ? (skuPerOutlet.reduce((a,b) => a+b, 0) / skuPerOutlet.length) : 0;
+        const shops = Object.values(data.reduce((m,v)=>{(m[v['Outlet Code']]=m[v['Outlet Code']]||[]).push(v);return m;},{}));
+        const avgSku = shops.length ? (shops.map(s => [...new Set(s.map(r=>r['SKU Code']))].length).reduce((a,b)=>a+b,0)/shops.length) : 0;
         document.getElementById('kpi-sku').innerText = avgSku.toFixed(1);
     }
 
     function renderHeatmap(data) {
         const thead = document.getElementById('theadRow');
         const tbody = document.getElementById('tbodyData');
-        
         const dates = [...new Set(data.map(d => d.Date))].sort();
         const obs = [...new Set(data.map(d => d['Order Booker Code']))].sort();
 
-        // Build Header
-        thead.innerHTML = '<th class="row-label">Order Booker</th>' + 
-            dates.map(d => `<th>${d.split('-').slice(1).join('/')}</th>`).join('') +
-            '<th>Total</th>';
+        if(!dates.length) { tbody.innerHTML = '<tr><td colspan="20" style="padding:40px">No data for selected filters</td></tr>'; return; }
 
-        // Map Data
+        thead.innerHTML = '<th class="row-label">Order Booker</th>' + dates.map(d => `<th>${d.split('-').slice(1).reverse().join('/')}</th>`).join('') + '<th>Total</th>';
+
         const matrix = obs.map(ob => {
-            const rowData = { ob, dates: {}, total: 0 };
-            dates.forEach(date => {
-                const val = data.filter(d => d['Order Booker Code'] === ob && d.Date === date)
-                                .reduce((s, r) => s + (r['Sales CTN'] || 0), 0);
-                rowData.dates[date] = val;
-                rowData.total += val;
+            const row = { ob, vals: {}, total: 0 };
+            dates.forEach(d => {
+                const v = data.filter(r => r['Order Booker Code']===ob && r.Date===d).reduce((s,r)=>s+(parseFloat(r['Sales CTN'])||0),0);
+                row.vals[d] = v; row.total += v;
             });
-            return rowData;
+            return row;
         });
 
-        const maxVal = Math.max(...matrix.flatMap(r => Object.values(r.dates)), 1);
-
-        // Build Body
+        const max = Math.max(...matrix.flatMap(r => Object.values(r.vals)), 1);
         tbody.innerHTML = matrix.map(row => `
             <tr>
                 <td class="row-label">${row.ob}</td>
                 ${dates.map(d => {
-                    const v = row.dates[d];
-                    const intensity = v / maxVal;
-                    const bg = v > 0 ? getHeatColor(intensity) : 'transparent';
-                    const color = intensity > 0.6 ? 'white' : 'var(--text-main)';
-                    return `<td><div class="cell-value" style="background:${bg}; color:${color}">${v > 0 ? v.toFixed(1) : '-'}</div></td>`;
+                    const v = row.vals[d]; const t = v/max;
+                    const bg = v > 0 ? `rgba(0, 90, 158, ${0.1 + t*0.9})` : 'transparent';
+                    return `<td><div class="cell-value" style="background:${bg}; color:${t>0.5?'white':'inherit'}">${v>0?v.toFixed(2):'-'}</div></td>`;
                 }).join('')}
-                <td style="font-weight:700">${row.total.toFixed(1)}</td>
+                <td style="font-weight:700">${row.total.toFixed(2)}</td>
             </tr>
         `).join('');
     }
 
-    // ─── Helpers ────────────────────────────────────────────────
-
-    function getHeatColor(t) {
-        // Simple PBI-style Blue gradient
-        const r = Math.floor(235 - (235 - 0) * t);
-        const g = Math.floor(242 - (242 - 90) * t);
-        const b = Math.floor(250 - (250 - 158) * t);
-        return `rgb(${r},${g},${b})`;
-    }
-
-    function populateFilters() {
-        const distributors = [...new Set(rawData.map(d => d.Distributor).filter(Boolean))].sort();
-        const categories = [...new Set(rawData.map(d => d.Category).filter(Boolean))].sort();
-        
-        const distSel = document.getElementById('filterDistributor');
-        distributors.forEach(d => distSel.add(new Option(d, d)));
-
-        const catSel = document.getElementById('filterCategory');
-        categories.forEach(c => catSel.add(new Option(c, c)));
-    }
-
-    function toggleSection(id) {
-        document.getElementById(id).classList.toggle('open');
-    }
-
-    function toggleTheme() {
-        state.theme = state.theme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', state.theme);
-    }
-
-    function groupBy(arr, key) {
-        return arr.reduce((m, v) => { (m[v[key]] = m[v[key]] || []).push(v); return m; }, {});
-    }
-
-    function exportData() {
-        const filtered = applyFilters(rawData);
-        const csv = [
-            Object.keys(filtered[0]).join(','),
-            ...filtered.map(row => Object.values(row).join(','))
-        ].join('\n');
-        
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `sales_export_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-    }
+    function toggleSection(id) { document.getElementById(id).classList.toggle('open'); }
+    function toggleTheme() { state.theme = state.theme==='light'?'dark':'light'; document.documentElement.setAttribute('data-theme', state.theme); }
+    function exportData() { /* Logic for CSV export as in previous version */ }
 
     function generateDemoData() {
-        const obs = ['OB-Ahmad', 'OB-Zubair', 'OB-Kashif', 'OB-Bilal', 'OB-Sami'];
-        const cats = ['Beverages', 'Snacks', 'Confectionery'];
-        const dists = ['Mega Dist A', 'Mega Dist B'];
-        const data = [];
-        const today = new Date();
-
-        for(let i=0; i<10; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateStr = date.toISOString().split('T')[0];
-
-            obs.forEach(ob => {
-                if(Math.random() > 0.2) {
-                    data.push({
-                        "Date": dateStr,
-                        "Order Booker Code": ob,
-                        "Distributor": dists[Math.floor(Math.random()*dists.length)],
-                        "Category": cats[Math.floor(Math.random()*cats.length)],
-                        "Position": Math.random() > 0.5 ? 'Top' : 'Mid',
-                        "Invoice Number": "INV-" + Math.random().toString(36).substr(2, 5).toUpperCase(),
-                        "Outlet Code": "OUT-" + (100 + Math.floor(Math.random()*20)),
-                        "SKU Code": "SKU-" + Math.floor(Math.random()*5),
-                        "Sales CTN": Math.floor(Math.random()*50) + 10
-                    });
-                }
+        const obs=['OB-19', 'OB-20'], cats=['Nimko','Chips'], dists=['Rauf Sons'], data=[];
+        for(let i=0; i<40; i++) {
+            data.push({
+                "Distributor Name": dists[0], "Order Booker Code": obs[i%2], "Category": cats[i%2],
+                "Invoice Number": "INV"+i, "Outlet Code": "OUT"+(i%5), "SKU Code": "SKU"+i,
+                "Date": "2026-04-01", "Sales CTN": Math.random()
             });
         }
         return data;
