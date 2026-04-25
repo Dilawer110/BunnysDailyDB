@@ -715,7 +715,7 @@ function setMetric(m) {
 function render() {
   const data  = getData();
   const dates = uniq(data.map(d => d['Date'])).sort();
-  const obs   = uniq(data.map(d => d['Order Booker Code'])).sort();
+const obs = uniq(data.map(d => d['Order Booker Name']).filter(Boolean)).sort();
 
   if (dates.length) {
     const f = d => { const [y,mo,dy]=d.split('-'); return `${dy}/${mo}/${y}`; };
@@ -735,7 +735,7 @@ function renderKPIs(data, dates, obs) {
   const byDate = gBy(data, 'Date');
   const dCtns  = dates.map(d => sum(byDate[d].map(r => r['Sales CTN']||0)));
   const dBills = dates.map(d => uniq(byDate[d].map(r => r['Invoice Number'])).length);
-  const dObs   = dates.map(d => uniq(byDate[d].map(r => r['Order Booker Code'])).length);
+  const dObs = dates.map(d => uniq(byDate[d].map(r => r['Order Booker Name'])).length);
   const dSku   = dates.map(d => {
     const bo = gBy(byDate[d], 'Outlet Code');
     return avg(Object.values(bo).map(rows => uniq(rows.map(r => r['SKU Code'])).length));
@@ -793,13 +793,9 @@ function renderHeatmap(data, dates, obs) {
   document.getElementById('hmSub').textContent =
     `${lbls[metric]} · ${obs.length} OB${obs.length!==1?'s':''} × ${dates.length} date${dates.length!==1?'s':''}`;
 
-  /* OB → Name map (from data.json Order Booker Name field) */
-  const obNames = {};
-  data.forEach(d => { if (d['Order Booker Code'] && d['Order Booker Name']) obNames[d['Order Booker Code']] = d['Order Booker Name']; });
-
-  /* Build matrix */
+/* Build matrix */
   const matrix = obs.map(ob => dates.map(date => {
-    const rows = data.filter(r => r['Order Booker Code'] === ob && r['Date'] === date);
+    const rows = data.filter(r => r['Order Booker Name'] === ob && r['Date'] === date);
     if (!rows.length) return null;
     if (metric === 'ctns')  return sum(rows.map(r => r['Sales CTN']||0));
     if (metric === 'bills') return uniq(rows.map(r => r['Invoice Number'])).length;
