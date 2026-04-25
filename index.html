@@ -954,13 +954,16 @@ function renderTSE() {
       avgBills: avg(dailyAvgBills),
       days:     tseDates.length
     };
-  }).sort((a, b) => b.avgSales - a.avgSales);
+});
 
   document.getElementById('tsePageSub').textContent =
     `${data.length.toLocaleString()} records · ${tseList.length} TSEs · ${dates.length} days`;
 
-  renderTSEChart('tseSalesCon', tseRows, 'avgSales', 'Avg Daily Sales CTN per OB', '#2A5298');
-  renderTSEChart('tseBillsCon', tseRows, 'avgBills', 'Avg Daily Bills per OB',     '#117A8B');
+  const salesRows = [...tseRows].sort((a, b) => b.avgSales - a.avgSales);
+  const billsRows = [...tseRows].sort((a, b) => b.avgBills - a.avgBills);
+
+  renderTSEChart('tseSalesCon', salesRows, 'avgSales', 'Avg Daily Sales CTN per OB', '#2A5298');
+  renderTSEChart('tseBillsCon', billsRows, 'avgBills', 'Avg Daily Bills per OB',     '#117A8B');
 }
 
 function renderTSEChart(conId, rows, key, label, color) {
