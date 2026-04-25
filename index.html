@@ -436,6 +436,11 @@ body{font-family:var(--font);background:var(--pbi-bg);color:var(--txt-b);font-si
         <div class="ni-lbl">Performance Overview<div class="ni-s">Day Wise Trend</div></div>
         <span class="ni-tag">LIVE</span>
       </div>
+      <div class="nav-item" data-r="tse" onclick="switchReport('tse')">
+        <div class="ni-ico"><svg viewBox="0 0 12 12" fill="none" stroke="var(--txt-m)" stroke-width="1.5"><circle cx="3" cy="9" r="1.5"/><circle cx="6" cy="5" r="1.5"/><circle cx="9" cy="7" r="1.5"/><path d="M3 7.5L6 3.5M6 3.5L9 5.5" stroke-linecap="round"/></svg></div>
+        <div class="ni-lbl">TSE Comparison<div class="ni-s">Avg Daily Performance</div></div>
+        <span class="ni-tag">LIVE</span>
+      </div>
       <div class="nav-item" data-r="stock" onclick="switchReport('stock')">
         <div class="ni-ico"><svg viewBox="0 0 12 12" fill="none" stroke="var(--txt-m)" stroke-width="1.5"><rect x="1" y="5" width="10" height="6" rx="1"/><path d="M3 5V4a3 3 0 016 0v1" stroke-linecap="round"/></svg></div>
         <div class="ni-lbl">Stock Position<div class="ni-s">Inventory Report</div></div>
@@ -497,6 +502,34 @@ body{font-family:var(--font);background:var(--pbi-bg);color:var(--txt-b);font-si
         </div>
       </div>
       <div class="hm-wrap"><div id="hmCon"><div class="state-box"><div class="spinner"></div></div></div></div>
+    </div>
+  </div>
+
+  <!-- Page: TSE Comparison -->
+  <div class="report-page" id="page-tse">
+    <div class="page-strip a1">
+      <div>
+        <div class="page-h">TSE Comparison — Avg Daily Performance</div>
+        <div class="page-sub" id="tsePageSub">Loading…</div>
+      </div>
+    </div>
+    <div class="vis-card a2">
+      <div class="vis-head">
+        <div>
+          <div class="vis-title">Avg Daily Sales CTN per Order Booker &nbsp;<span style="color:var(--txt-l);font-weight:400;font-size:10px">by TSE</span></div>
+          <div class="vis-sub">Average cartons sold per working day, per OB under each TSE</div>
+        </div>
+      </div>
+      <div style="padding:10px 14px 14px" id="tseSalesCon"><div class="state-box"><div class="spinner"></div></div></div>
+    </div>
+    <div class="vis-card a3">
+      <div class="vis-head">
+        <div>
+          <div class="vis-title">Avg Daily Bills per Order Booker &nbsp;<span style="color:var(--txt-l);font-weight:400;font-size:10px">by TSE</span></div>
+          <div class="vis-sub">Average unique bills raised per working day, per OB under each TSE</div>
+        </div>
+      </div>
+      <div style="padding:10px 14px 14px" id="tseBillsCon"><div class="state-box"><div class="spinner"></div></div></div>
     </div>
   </div>
 
@@ -593,9 +626,10 @@ function toggleGrp(id) { document.getElementById(id).classList.toggle('open'); }
 /* ════ NAVIGATION ═══════════════════════════════════════ */
 const RPT_META = {
   overview:  ['Performance Overview', 'Day Wise Trend'],
-  stock:     ['Stock Position',        'Inventory Report'],
-  forecast:  ['Closing Forecast',      'Predictive Analytics'],
-  orders:    ['Order Planning',        'Supply Chain']
+  tse:       ['TSE Comparison',       'Avg Daily Sales & Bills per OB'],
+  stock:     ['Stock Position',       'Inventory Report'],
+  forecast:  ['Closing Forecast',     'Predictive Analytics'],
+  orders:    ['Order Planning',       'Supply Chain']
 };
 function switchReport(id) {
   curRpt = id;
@@ -609,8 +643,9 @@ function switchReport(id) {
   const [t, s] = RPT_META[id] || ['Report',''];
   document.getElementById('hdrTitle').textContent = t;
   document.getElementById('hdrSub').textContent   = s;
-  if (id === 'overview') render();
-  closeExp();
+ if (id === 'overview') render();
+  if (id === 'tse') renderTSE();
+  closeExp();;
 }
 
 /* ════ FILTERS ══════════════════════════════════════════ */
@@ -806,7 +841,7 @@ function renderHeatmap(data, dates, obs) {
     <tbody>`;
 
   obs.forEach((ob, oi) => {
-    const nm = obNames[ob] ? `${ob}<br><span style="font-size:8.5px;color:var(--txt-l);font-weight:400">${obNames[ob]}</span>` : ob;
+   const nm = ob;
     html += `<tr><td class="c-ob">${nm}</td>`;
     dates.forEach((_, di) => {
       const v = matrix[oi][di];
@@ -885,6 +920,77 @@ function mkDemo() {
     });
   }
   return rows;
+}
+
+/* ════ TSE COMPARISON ═══════════════════════════════════ */
+function renderTSE() {
+  const data  = getData();
+  const dates = uniq(data.map(d => d['Date']));
+  const obs   = uniq(data.map(d => d['Order Booker Name']).filter(Boolean)).sort();
+
+  document.getElementById('tsePageSub').textContent =
+    `${data.length.toLocaleString()} records · ${obs.length} OBs · ${dates.length} days`;
+
+  /* Build per-OB metrics */
+  const obRows = obs.map(ob => {
+    const obData  = data.filter(r => r['Order Booker Name'] === ob);
+    const obDates = uniq(obData.map(r => r['Date']));
+    const tse     = (fDist !== 'All' && TSE_MAP[fDist]) ? TSE_MAP[fDist]
+                  : (TSE_MAP[Object.keys(TSE_MAP).find(k => allData.find(r => r['Distributor Name']===k && r['Order Booker Name']===ob))] || '—');
+    const byDate  = gBy(obData, 'Date');
+    const dailySales = obDates.map(d => sum(byDate[d].map(r => r['Sales CTN']||0)));
+    const dailyBills = obDates.map(d => uniq(byDate[d].map(r => r['Invoice Number'])).length);
+    return {
+      ob,
+      tse,
+      avgSales: avg(dailySales),
+      avgBills: avg(dailyBills),
+      days:     obDates.length
+    };
+  }).sort((a, b) => b.avgSales - a.avgSales);
+
+  renderTSEChart('tseSalesCon', obRows, 'avgSales', 'Avg Daily Sales (CTN)', '#2A5298');
+  renderTSEChart('tseBillsCon', obRows, 'avgBills', 'Avg Daily Bills',       '#117A8B');
+}
+
+function renderTSEChart(conId, rows, key, label, color) {
+  if (!rows.length) {
+    document.getElementById(conId).innerHTML = `<div class="state-box">No data for current filters.</div>`;
+    return;
+  }
+  const maxVal  = Math.max(...rows.map(r => r[key]));
+  const html = `
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt-m);margin-bottom:8px">${label}</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid var(--pbi-border)">
+          <th style="text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-m);padding:3px 8px 5px 0;width:160px">Order Booker</th>
+          <th style="text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-m);padding:3px 8px 5px;width:110px">TSE</th>
+          <th style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-m);padding:3px 0 5px;text-align:right;width:54px">Value</th>
+          <th style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-m);padding:3px 0 5px 10px">Bar</th>
+          <th style="text-align:right;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-m);padding:3px 0 5px 8px;width:40px">Days</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r, i) => {
+          const pct   = maxVal ? (r[key] / maxVal) * 100 : 0;
+          const rank  = i === 0 ? `<span style="background:rgba(42,82,152,.1);color:var(--pbi-blue);font-size:8px;font-weight:800;padding:1px 5px;border-radius:99px;margin-left:5px">TOP</span>` : '';
+          const shade = i % 2 === 0 ? 'background:rgba(242,245,249,.6)' : '';
+          return `<tr style="${shade}">
+            <td style="padding:5px 8px 5px 0;font-size:11px;font-weight:600;color:var(--txt-b)">${r.ob}${rank}</td>
+            <td style="padding:5px 8px;font-size:10px;color:var(--txt-m)">${r.tse}</td>
+            <td style="padding:5px 0;font-size:11px;font-weight:700;color:var(--txt-h);text-align:right;font-variant-numeric:tabular-nums">${r[key].toFixed(2)}</td>
+            <td style="padding:5px 0 5px 10px">
+              <div style="background:var(--pbi-bg);border-radius:2px;height:10px;overflow:hidden">
+                <div style="width:${pct.toFixed(1)}%;height:100%;background:${color};border-radius:2px;transition:width .4s ease"></div>
+              </div>
+            </td>
+            <td style="padding:5px 0 5px 8px;font-size:9.5px;color:var(--txt-l);text-align:right">${r.days}d</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+  document.getElementById(conId).innerHTML = html;
 }
 
 /* ════ BOOT ═════════════════════════════════════════════ */
