@@ -8,44 +8,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            --bg-app: #f4f6f9;
+            /* Power BI Standard Palette */
+            --bg-app: #f3f2f1; /* PBI Light Gray */
             --bg-card: #ffffff;
             --bg-sidebar: #ffffff;
-            --bg-header: #001e4d;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --border: #e2e8f0;
-            --accent: #005a9e; 
-            --header-h: 48px;
-            --sidebar-w: 240px;
-            --radius: 4px;
-            --shadow: 0 1px 2px rgba(0,0,0,0.05);
+            --bg-header: #12239e; /* PBI Signature Blue */
+            --text-main: #252423;
+            --text-sub: #605e5c;
+            --border: #edebe9;
+            --accent: #12239e; 
+            --pbi-yellow: #f2c811; /* PBI Gold/Yellow */
+            --header-h: 44px;
+            --sidebar-w: 230px;
+            --radius: 2px; /* PBI uses sharper corners */
+            --shadow: 0 1.6px 3.6px 0 rgba(0,0,0,.132), 0 .3px .9px 0 rgba(0,0,0,.108);
             --transition: all 0.15s ease;
         }
 
         [data-theme="dark"] {
-            --bg-app: #0f172a;
-            --bg-card: #1e293b;
-            --bg-sidebar: #1e293b;
+            --bg-app: #111111;
+            --bg-card: #1b1b1b;
+            --bg-sidebar: #1b1b1b;
             --bg-header: #000000;
-            --text-main: #f1f5f9;
-            --text-sub: #94a3b8;
-            --border: #334155;
-            --accent: #3b82f6;
+            --text-main: #ffffff;
+            --text-sub: #a19f9d;
+            --border: #323130;
+            --accent: #4758eb;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Segoe UI', 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-app);
             color: var(--text-main);
             overflow: hidden; 
             height: 100vh;
             display: flex;
             flex-direction: column;
-            font-size: 13px;
+            font-size: 12px;
         }
 
+        /* ─── Header ────────────────────────────────────────────── */
         header {
             height: var(--header-h);
             background: var(--bg-header);
@@ -54,6 +57,7 @@
             align-items: center;
             padding: 0 12px;
             z-index: 1000;
+            border-bottom: 3px solid var(--pbi-yellow);
         }
 
         .brand-box {
@@ -64,41 +68,42 @@
             flex-shrink: 0;
         }
 
-        .brand-title { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .brand-title { font-weight: 600; font-size: 13px; letter-spacing: 0.2px; }
 
         .top-filters {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             padding: 0 16px;
         }
 
         .filter-pill {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: var(--radius);
-            padding: 2px 8px;
             display: flex;
             align-items: center;
             gap: 6px;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.9);
             font-size: 11px;
         }
 
         .filter-pill select {
-            background: transparent;
-            border: none;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 2px;
             color: white;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 400;
             outline: none;
             cursor: pointer;
-            min-width: 100px;
+            padding: 2px 6px;
+            min-width: 110px;
         }
+
+        .filter-pill select option { background: #1b1b1b; color: white; }
 
         .header-actions { display: flex; align-items: center; gap: 8px; }
 
+        /* ─── Layout ────────────────────────────────────────────── */
         .app-container { display: flex; flex: 1; overflow: hidden; }
 
         aside {
@@ -111,120 +116,129 @@
         }
 
         .nav-section { border-bottom: 1px solid var(--border); }
-
         .nav-header {
-            padding: 12px;
+            padding: 10px 12px;
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--text-sub);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            user-select: none;
         }
 
-        .nav-content { padding: 0 8px 12px; display: none; }
+        .nav-content { padding: 0 4px 10px; display: none; }
         .nav-section.open .nav-content { display: block; }
         .nav-section.open .chevron { transform: rotate(180deg); }
 
         .nav-item {
-            padding: 8px 10px;
-            border-radius: var(--radius);
+            padding: 6px 10px;
+            border-radius: 2px;
             font-size: 12px;
-            font-weight: 500;
             color: var(--text-main);
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            margin-bottom: 2px;
-            transition: var(--transition);
+            margin-bottom: 1px;
         }
 
-        .nav-item:hover { background: var(--bg-app); }
-        .nav-item.active { background: var(--accent); color: white; font-weight: 600; }
+        .nav-item:hover { background: #f3f2f1; }
+        .nav-item.active { background: #e9e9e9; border-left: 4px solid var(--accent); font-weight: 600; padding-left: 6px; }
 
         main {
             flex: 1;
-            padding: 12px;
+            padding: 16px;
             overflow-y: auto;
             background: var(--bg-app);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
 
-        /* ─── Pages ────────────────────────────────────────────── */
-        .page { display: none; flex-direction: column; gap: 12px; height: 100%; }
-        .page.active { display: flex; }
-
-        /* ─── KPI & Heatmap ────────────────────────────────────── */
-        .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); }
+        /* ─── KPI & Visuals ────────────────────────────────────── */
+        .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .kpi-card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            padding: 12px 16px; 
+            box-shadow: var(--shadow);
+            border-bottom: 4px solid var(--pbi-yellow);
+        }
         .kpi-label { font-size: 10px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 4px; }
-        .kpi-value { font-size: 20px; font-weight: 800; color: var(--text-main); }
+        .kpi-value { font-size: 24px; font-weight: 700; color: var(--text-main); font-family: 'Segoe UI Semibold', sans-serif; }
 
-        .visual-container { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
-        .visual-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.01); }
-        .visual-title { font-size: 13px; font-weight: 700; }
-        .table-wrap { flex: 1; overflow: auto; padding: 10px; }
+        .visual-container { 
+            flex: 1; 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow);
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        .visual-header { 
+            padding: 8px 16px; 
+            border-bottom: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .visual-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .table-wrap { flex: 1; overflow: auto; padding: 12px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { position: sticky; top: 0; background: var(--bg-card); padding: 8px; color: var(--text-sub); border-bottom: 2px solid var(--border); z-index: 10; }
-        td { padding: 4px; border: 1px solid var(--border); text-align: center; }
-        .row-label { text-align: left; font-weight: 600; padding-left: 10px; width: 140px; }
-        .cell-value { width: 100%; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-
-        /* ─── Placeholder UI ────────────────────────────────────── */
-        .placeholder-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            text-align: center;
-            padding: 40px;
-        }
-
-        .placeholder-icon {
-            width: 64px; height: 64px;
-            background: var(--bg-app);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px;
-            color: var(--accent);
-        }
-
-        .placeholder-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-        .placeholder-text { color: var(--text-sub); max-width: 400px; line-height: 1.6; margin-bottom: 24px; }
-        
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: var(--radius);
+        th { 
+            position: sticky; top: 0; 
+            background: #f8f8f8; 
+            padding: 8px 4px; 
+            color: var(--text-main); 
             font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
+            border-bottom: 1px solid var(--border); 
+            z-index: 10; 
+            text-align: center;
+        }
+        td { padding: 4px; border: 1px solid var(--border); text-align: center; }
+        .row-label { text-align: left; font-weight: 600; padding-left: 10px; background: #fafafa; }
+        
+        .total-row { background: #f3f2f1; font-weight: 700; }
+        .total-row td { border-top: 2px solid var(--text-sub); }
+
+        .cell-value { 
+            width: 100%; 
+            height: 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'JetBrains Mono', monospace; 
+            font-weight: 600;
+            border-radius: 1px;
         }
 
-        .icon-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px; border-radius: var(--radius); cursor: pointer; display: flex; }
-        .chevron { transition: var(--transition); width: 14px; height: 14px; }
+        /* ─── Buttons ──────────────────────────────────────────── */
+        .icon-btn { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px; cursor: pointer; display: flex; align-items: center; border-radius: 2px; }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
+        .chevron { transition: var(--transition); width: 12px; height: 12px; }
+
+        .page { display: none; flex-direction: column; gap: 16px; height: 100%; }
+        .page.active { display: flex; }
+
+        .placeholder-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border); text-align: center; padding: 40px; }
+        .placeholder-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+        .btn-primary { background: var(--accent); color: white; border: none; padding: 8px 20px; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="brand-box">
-        <svg width="20" height="20" viewBox="0 0 100 100" fill="white"><rect x="20" y="40" width="12" height="40" rx="2"/><rect x="44" y="20" width="12" height="60" rx="2"/><rect x="68" y="50" width="12" height="30" rx="2"/></svg>
+        <svg width="20" height="20" viewBox="0 0 100 100" fill="white">
+            <rect x="20" y="45" width="12" height="35" rx="1"/>
+            <rect x="44" y="25" width="12" height="55" rx="1"/>
+            <rect x="68" y="55" width="12" height="25" rx="1"/>
+        </svg>
         <div class="brand-title">Daily Sales Performance</div>
     </div>
 
@@ -232,6 +246,10 @@
         <div class="filter-pill">
             <span>Distributor:</span>
             <select id="filterDistributor" onchange="updateDashboard()"><option value="All">All Distributors</option></select>
+        </div>
+        <div class="filter-pill">
+            <span>Channel:</span>
+            <select id="filterChannel" onchange="updateDashboard()"><option value="All">All Channels</option></select>
         </div>
         <div class="filter-pill">
             <span>Category:</span>
@@ -249,8 +267,9 @@
     </div>
 
     <div class="header-actions">
-        <button class="icon-btn" onclick="toggleTheme()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><path d="M8 1v1M8 14v1M1 8h1M14 8h1M2.5 2.5l1 1M12.5 12.5l1 1M2.5 13.5l1-1M13.5 2.5l-1 1"/></svg></button>
-        <button class="icon-btn" onclick="exportData()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 10v3a1 1 0 01-1 1H3a1 1 0 01-1-1v-3M4 7l4 4 4-4M8 11V1"/></svg></button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Theme"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/><path d="M7 1v1M7 12v1M1 7h1M12 7h1"/></svg></button>
+        <button class="icon-btn" onclick="exportImage()" title="Export Image"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 10l5 5 5-5M7 15V3"/><path d="M1 12v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke-linecap="round"/></svg></button>
+        <button class="icon-btn" onclick="exportCSV()" title="Export CSV"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h12v10H1V3zM4 6h6M4 8h6M4 10h4"/></svg></button>
     </div>
 </header>
 
@@ -264,7 +283,6 @@
                 <div class="nav-item" onclick="switchReport('Sales Team Incentives')">Sales Team Incentives</div>
             </div>
         </div>
-
         <div class="nav-section open" id="sect2">
             <div class="nav-header" onclick="toggleSection('sect2')">CHANNELS <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
@@ -273,7 +291,6 @@
                 <div class="nav-item" onclick="switchReport('Stands Outlets')">Stands Outlets</div>
             </div>
         </div>
-
         <div class="nav-section open" id="sect3">
             <div class="nav-header" onclick="toggleSection('sect3')">RANKINGS <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></div>
             <div class="nav-content">
@@ -283,8 +300,7 @@
         </div>
     </aside>
 
-    <main>
-        <!-- LIVE PAGE -->
+    <main id="capture-area">
         <div id="page-overview" class="page active">
             <div class="kpi-strip">
                 <div class="kpi-card"><div class="kpi-label">Sales in Ctns (Avg/Day)</div><div class="kpi-value" id="kpi-ctns">0.00</div></div>
@@ -298,13 +314,11 @@
             </div>
         </div>
 
-        <!-- PLACEHOLDER PAGE -->
         <div id="page-placeholder" class="page">
             <div class="placeholder-content">
-                <div class="placeholder-icon"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
                 <div class="placeholder-title" id="placeholderReportTitle">Report Under Construction</div>
-                <div class="placeholder-text">We are currently integrating real-time data for this module. This report will be available in the next system update.</div>
-                <button class="btn-primary" onclick="switchReport('Performance Overview')">Return to Overview</button>
+                <div class="placeholder-text">Module being finalized with live distributor data.</div>
+                <button class="btn-primary" onclick="switchReport('Performance Overview')">Go Back</button>
             </div>
         </div>
     </main>
@@ -312,7 +326,7 @@
 
 <script>
     let rawData = [];
-    let state = { theme: 'light', distributor: 'All', category: 'All', position: 'All' };
+    let state = { theme: 'light', distributor: 'All', channel: 'All', category: 'All', position: 'All' };
 
     window.onload = () => {
         fetch('data.json').then(res => res.json()).then(data => { rawData = data; initApp(); })
@@ -322,30 +336,25 @@
     function initApp() { populateFilters(); updateDashboard(); }
 
     function switchReport(name) {
-        // Update Nav UI
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.innerText === name);
-        });
-
-        // Switch View
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.innerText === name));
         const isOverview = name === 'Performance Overview';
         document.getElementById('page-overview').classList.toggle('active', isOverview);
         document.getElementById('page-placeholder').classList.toggle('active', !isOverview);
-
-        if (!isOverview) {
-            document.getElementById('placeholderReportTitle').innerText = name + " - Coming Soon";
-        } else {
-            updateDashboard(); // Ensure overview data is fresh
-        }
+        if (!isOverview) document.getElementById('placeholderReportTitle').innerText = name;
     }
 
     function populateFilters() {
         const distributors = [...new Set(rawData.map(d => d["Distributor Name"]).filter(Boolean))].sort();
+        const channels = [...new Set(rawData.map(d => d["Channel"]).filter(Boolean))].sort();
         const categories = [...new Set(rawData.map(d => d.Category).filter(Boolean))].sort();
         
         const distSel = document.getElementById('filterDistributor');
         distSel.innerHTML = '<option value="All">All Distributors</option>';
         distributors.forEach(d => distSel.add(new Option(d, d)));
+
+        const chanSel = document.getElementById('filterChannel');
+        chanSel.innerHTML = '<option value="All">All Channels</option>';
+        channels.forEach(c => chanSel.add(new Option(c, c)));
 
         const catSel = document.getElementById('filterCategory');
         catSel.innerHTML = '<option value="All">All Categories</option>';
@@ -354,14 +363,16 @@
 
     function updateDashboard() {
         state.distributor = document.getElementById('filterDistributor').value;
+        state.channel = document.getElementById('filterChannel').value;
         state.category = document.getElementById('filterCategory').value;
         state.position = document.getElementById('filterPosition').value;
 
         const filtered = rawData.filter(d => {
             const mDist = state.distributor === 'All' || d["Distributor Name"] === state.distributor;
+            const mChan = state.channel === 'All' || d["Channel"] === state.channel;
             const mCat = state.category === 'All' || d.Category === state.category;
             const mPos = state.position === 'All' || (d.Position || 'Mid') === state.position;
-            return mDist && mCat && mPos;
+            return mDist && mChan && mCat && mPos;
         });
 
         calculateKPIs(filtered);
@@ -372,19 +383,22 @@
     function calculateKPIs(data) {
         const dates = [...new Set(data.map(d => d.Date))];
         const dayCount = dates.length || 1;
-        
         const totalCtns = data.reduce((s, d) => s + (parseFloat(d['Sales CTN']) || 0), 0);
         document.getElementById('kpi-ctns').innerText = (totalCtns / dayCount).toFixed(2);
-
         const totalBills = [...new Set(data.map(d => d['Invoice Number']))].length;
         document.getElementById('kpi-bills').innerText = Math.round(totalBills / dayCount);
-
         const obsPerDay = dates.map(dt => [...new Set(data.filter(d => d.Date === dt).map(d => d['Order Booker Code']))].length);
         document.getElementById('kpi-obs').innerText = Math.round(obsPerDay.reduce((a,b)=>a+b,0)/dayCount || 0);
-
         const shops = Object.values(data.reduce((m,v)=>{(m[v['Outlet Code']]=m[v['Outlet Code']]||[]).push(v);return m;},{}));
         const avgSku = shops.length ? (shops.map(s => [...new Set(s.map(r=>r['SKU Code']))].length).reduce((a,b)=>a+b,0)/shops.length) : 0;
         document.getElementById('kpi-sku').innerText = avgSku.toFixed(1);
+    }
+
+    function getContrastColor(hexColor) {
+        if (!hexColor || hexColor === 'transparent') return 'inherit';
+        const r = parseInt(hexColor.slice(5, 7), 10) || 0; // Rough extraction from rgba or dynamic string
+        // Since we are using rgba(0, 90, 158, t), let's simplify contrast
+        return 'inherit'; 
     }
 
     function renderHeatmap(data) {
@@ -393,44 +407,88 @@
         const dates = [...new Set(data.map(d => d.Date))].sort();
         const obs = [...new Set(data.map(d => d['Order Booker Code']))].sort();
 
-        if(!dates.length) { tbody.innerHTML = '<tr><td colspan="20" style="padding:40px">No data for selected filters</td></tr>'; return; }
+        if(!dates.length) { tbody.innerHTML = '<tr><td colspan="30" style="padding:40px">No data</td></tr>'; return; }
 
-        thead.innerHTML = '<th class="row-label">Order Booker</th>' + dates.map(d => `<th>${d.split('-').slice(1).reverse().join('/')}</th>`).join('') + '<th>Total</th>';
+        thead.innerHTML = '<th>Order Booker</th>' + dates.map(d => `<th>${d.split('-').slice(1).reverse().join('/')}</th>`).join('') + '<th>Total</th>';
+
+        const dateTotals = {};
+        dates.forEach(d => dateTotals[d] = 0);
+        let grandTotal = 0;
 
         const matrix = obs.map(ob => {
             const row = { ob, vals: {}, total: 0 };
             dates.forEach(d => {
                 const v = data.filter(r => r['Order Booker Code']===ob && r.Date===d).reduce((s,r)=>s+(parseFloat(r['Sales CTN'])||0),0);
                 row.vals[d] = v; row.total += v;
+                dateTotals[d] += v;
+                grandTotal += v;
             });
             return row;
         });
 
         const max = Math.max(...matrix.flatMap(r => Object.values(r.vals)), 1);
-        tbody.innerHTML = matrix.map(row => `
+
+        let html = matrix.map(row => `
             <tr>
                 <td class="row-label">${row.ob}</td>
                 ${dates.map(d => {
                     const v = row.vals[d]; const t = v/max;
-                    const bg = v > 0 ? `rgba(0, 90, 158, ${0.1 + t*0.9})` : 'transparent';
-                    return `<td><div class="cell-value" style="background:${bg}; color:${t>0.5?'white':'inherit'}">${v>0?v.toFixed(2):'-'}</div></td>`;
+                    const bg = v > 0 ? `rgba(18, 35, 158, ${0.1 + t*0.8})` : 'transparent';
+                    const color = t > 0.5 ? 'white' : 'var(--text-main)';
+                    return `<td><div class="cell-value" style="background:${bg}; color:${color}">${v>0?v.toFixed(2):'-'}</div></td>`;
                 }).join('')}
                 <td style="font-weight:700">${row.total.toFixed(2)}</td>
             </tr>
         `).join('');
+
+        // ADD GRAND TOTAL ROW
+        html += `
+            <tr class="total-row">
+                <td class="row-label">Grand Total</td>
+                ${dates.map(d => `<td>${dateTotals[d].toFixed(2)}</td>`).join('')}
+                <td>${grandTotal.toFixed(2)}</td>
+            </tr>
+        `;
+
+        tbody.innerHTML = html;
     }
 
     function toggleSection(id) { document.getElementById(id).classList.toggle('open'); }
     function toggleTheme() { state.theme = state.theme==='light'?'dark':'light'; document.documentElement.setAttribute('data-theme', state.theme); }
-    function exportData() { /* Logic for CSV export as in previous version */ }
+
+    function exportCSV() {
+        const filtered = rawData.filter(d => {
+            const mDist = state.distributor === 'All' || d["Distributor Name"] === state.distributor;
+            const mChan = state.channel === 'All' || d["Channel"] === state.channel;
+            const mCat = state.category === 'All' || d.Category === state.category;
+            return mDist && mChan && mCat;
+        });
+        if(!filtered.length) return;
+        const csv = [Object.keys(filtered[0]).join(','), ...filtered.map(row => Object.values(row).map(v => `"${v}"`).join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `bunny_sales_export.csv`;
+        a.click();
+    }
+
+    function exportImage() {
+        const area = document.getElementById('capture-area');
+        html2canvas(area, { backgroundColor: state.theme === 'light' ? '#f3f2f1' : '#111111', scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'daily_sales_snapshot.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
 
     function generateDemoData() {
-        const obs=['OB-19', 'OB-20'], cats=['Nimko','Chips'], dists=['Rauf Sons'], data=[];
-        for(let i=0; i<40; i++) {
+        const obs=['OB1', 'OB2', 'OB3'], cats=['Nimko','Chips'], dists=['A&H Enterprises'], data=[];
+        for(let i=0; i<60; i++) {
             data.push({
-                "Distributor Name": dists[0], "Order Booker Code": obs[i%2], "Category": cats[i%2],
-                "Invoice Number": "INV"+i, "Outlet Code": "OUT"+(i%5), "SKU Code": "SKU"+i,
-                "Date": "2026-04-01", "Sales CTN": Math.random()
+                "Distributor Name": dists[0], "Order Booker Code": obs[i%3], "Category": cats[i%2], "Channel": i%3===0?"LMT":"Retail",
+                "Invoice Number": "INV"+i, "Outlet Code": "OUT"+(i%8), "SKU Code": "SKU"+i,
+                "Date": "2026-04-0" + (Math.floor(i/10)+1), "Sales CTN": Math.random()*20
             });
         }
         return data;
