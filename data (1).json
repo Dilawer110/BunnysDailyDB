@@ -1,0 +1,18 @@
+[
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13730","Order Booker Code":"D0002OB19","Outlet Code":"N00000007906","Channel":"Retail","Category":"Nimko","SKU Code":"SKU00039","Date":"2026-04-01","Sales CTN":0.083333333},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13730","Order Booker Code":"D0002OB19","Outlet Code":"N00000007906","Channel":"Retail","Category":"Nimko","SKU Code":"SKU00041","Date":"2026-04-01","Sales CTN":0.083333333},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13731","Order Booker Code":"D0002OB19","Outlet Code":"N00000006119","Channel":"Retail","Category":"Chips","SKU Code":"SKU00058","Date":"2026-04-01","Sales CTN":0.222222222},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13731","Order Booker Code":"D0002OB19","Outlet Code":"N00000006119","Channel":"Retail","Category":"Nimko","SKU Code":"SKU00063","Date":"2026-04-01","Sales CTN":0.111111111},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13732","Order Booker Code":"D0002OB19","Outlet Code":"N00000006123","Channel":"Retail","Category":"Munchese","SKU Code":"SKU00003","Date":"2026-04-01","Sales CTN":0.5},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13732","Order Booker Code":"D0002OB19","Outlet Code":"N00000006123","Channel":"Retail","Category":"Munchese","SKU Code":"SKU00005","Date":"2026-04-01","Sales CTN":0.5},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13733","Order Booker Code":"D0002OB19","Outlet Code":"N00000003487","Channel":"Retail","Category":"Munchese","SKU Code":"SKU00003","Date":"2026-04-01","Sales CTN":0.5},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13733","Order Booker Code":"D0002OB19","Outlet Code":"N00000003487","Channel":"Retail","Category":"Munchese","SKU Code":"SKU00005","Date":"2026-04-01","Sales CTN":0.5},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13734","Order Booker Code":"D0002OB19","Outlet Code":"N00000007905","Channel":"Retail","Category":"Nimko","SKU Code":"SKU00059","Date":"2026-04-01","Sales CTN":0.222222222},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13734","Order Booker Code":"D0002OB19","Outlet Code":"N00000007905","Channel":"Retail","Category":"Nimko","SKU Code":"SKU00060","Date":"2026-04-01","Sales CTN":0.222222222},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13735","Order Booker Code":"D0002OB19","Outlet Code":"N00000003488","Channel":"Retail","Category":"Nuts","SKU Code":"SKU00034","Date":"2026-04-01","Sales CTN":0.273809524},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13735","Order Booker Code":"D0002OB19","Outlet Code":"N00000003488","Channel":"Retail","Category":"Nuts","SKU Code":"SKU00065","Date":"2026-04-01","Sales CTN":0.011904762},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13736","Order Booker Code":"D0002OB19","Outlet Code":"N00000006118","Channel":"Retail","Category":"Nuts","SKU Code":"SKU00034","Date":"2026-04-01","Sales CTN":0.071428571},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13736","Order Booker Code":"D0002OB19","Outlet Code":"N00000006118","Channel":"Retail","Category":"Nimko","SKU Code":"SKU00041","Date":"2026-04-01","Sales CTN":0.083333333},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13736","Order Booker Code":"D0002OB19","Outlet Code":"N00000006118","Channel":"Retail","Category":"Nuts","SKU Code":"SKU00065","Date":"2026-04-01","Sales CTN":0.071428571},
+  {"Distributor Name":"Rauf Sons","Invoice Number":"D0002INV13737","Order Booker Code":"D0002OB19","Outlet Code":"N00000003484","Channel":"Retail","Category":"Munchese","SKU Code":"SKU00003","Date":"2026-04-01","Sales CTN":0.25}
+]
