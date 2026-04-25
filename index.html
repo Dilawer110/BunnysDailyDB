@@ -1,432 +1,1604 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sales KPI Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bunny's Sales Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --pbi-yellow:#F2C811;
-  --pbi-dark:#252525;
-  --pbi-nav:#1E1E1E;
-  --pbi-nav-hover:#333;
-  --pbi-canvas:#F3F2F1;
-  --pbi-surface:#FFFFFF;
-  --pbi-border:#E0DFDD;
-  --pbi-border-dark:#C8C6C4;
-  --pbi-text:#252423;
-  --pbi-text-sec:#605E5C;
-  --pbi-text-muted:#A19F9D;
-  --pbi-accent:#118DFF;
-  --shadow:0 1.6px 3.6px rgba(0,0,0,.13),0 0.3px 0.9px rgba(0,0,0,.1);
-  --shadow-md:0 3.2px 7.2px rgba(0,0,0,.15),0 0.6px 1.8px rgba(0,0,0,.1);
-  --font:'Segoe UI','Helvetica Neue',sans-serif;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Brand Colors */
+  --blue: #4868A8;
+  --navy: #1C3D7A;
+  --night: #001840;
+  --sky: #6B8FC4;
+  --ice: #E8F0FA;
+
+  /* Extended Palette */
+  --surface: #ffffff;
+  --surface2: #f3f6fb;
+  --border: rgba(72,104,168,0.13);
+  --border-strong: rgba(72,104,168,0.25);
+  --text-primary: #0d1b35;
+  --text-secondary: #3a4f72;
+  --text-muted: #7a8fae;
+  --text-light: #a8bdd4;
+
+  --success: #0fa86a;
+  --success-bg: #e6f8f1;
+  --warning: #e09500;
+  --warning-bg: #fff8e6;
+  --danger: #e03838;
+  --danger-bg: #fdeaea;
+
+  --shadow-xs: 0 1px 3px rgba(28,61,122,0.06);
+  --shadow-sm: 0 2px 8px rgba(28,61,122,0.08), 0 1px 3px rgba(28,61,122,0.05);
+  --shadow-md: 0 6px 24px rgba(28,61,122,0.10), 0 2px 6px rgba(28,61,122,0.06);
+  --shadow-lg: 0 16px 48px rgba(28,61,122,0.14), 0 4px 12px rgba(28,61,122,0.08);
+  --shadow-glow: 0 0 0 3px rgba(72,104,168,0.15);
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --sidebar-w: 260px;
+  --header-h: 62px;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-body{font-family:var(--font);background:var(--pbi-canvas);color:var(--pbi-text);min-height:100vh;display:flex;flex-direction:column;}
 
-/* TOP BAR */
-.topbar{height:48px;background:var(--pbi-nav);display:flex;align-items:center;padding:0 16px;gap:12px;position:sticky;top:0;z-index:200;flex-shrink:0;}
-.tb-logo{display:flex;align-items:center;gap:9px;}
-.tb-logo svg{width:22px;height:22px;}
-.tb-title{color:#fff;font-size:13.5px;font-weight:600;letter-spacing:.01em;}
-.tb-sep{width:1px;height:22px;background:#444;margin:0 2px;}
-.tb-sub{color:#a0a0a0;font-size:12px;}
-.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-.tb-pill{background:rgba(242,200,17,.18);border:1px solid rgba(242,200,17,.4);color:var(--pbi-yellow);border-radius:3px;padding:3px 10px;font-size:11px;font-weight:600;letter-spacing:.04em;}
-.tb-btn{background:transparent;border:1px solid #555;color:#ccc;border-radius:3px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:var(--font);transition:background .15s;}
-.tb-btn:hover{background:#333;color:#fff;}
+body {
+  font-family: var(--font);
+  background: var(--ice);
+  color: var(--text-primary);
+  min-height: 100vh;
+  font-size: 13.5px;
+  line-height: 1.55;
+  overflow-x: hidden;
+}
 
-/* SHELL */
-.shell{display:flex;flex:1;min-height:0;}
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sky); }
 
-/* SIDENAV */
-.sidenav{width:218px;flex-shrink:0;background:var(--pbi-dark);display:flex;flex-direction:column;padding:10px 0 20px;overflow-y:auto;position:sticky;top:48px;height:calc(100vh - 48px);}
-.nav-lbl{font-size:9.5px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:.12em;padding:14px 14px 5px;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;font-size:12.5px;color:#ccc;transition:background .12s,color .12s;border-left:3px solid transparent;user-select:none;}
-.nav-item:hover{background:var(--pbi-nav-hover);color:#fff;}
-.nav-item.active{background:rgba(242,200,17,.13);color:var(--pbi-yellow);border-left-color:var(--pbi-yellow);font-weight:600;}
-.nav-item svg{width:14px;height:14px;flex-shrink:0;fill:currentColor;}
-.nav-div{height:1px;background:#333;margin:6px 14px;}
-.fg{padding:2px 10px 8px;}
-.fg-title{font-size:9.5px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:.1em;padding:10px 4px 4px;}
-.sel-all{font-size:10px;color:#777;padding:1px 4px 5px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
-.sel-all:hover{color:#aaa;}
-.chip-wrap{display:flex;flex-direction:column;gap:1px;}
-.chip{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:3px;font-size:12px;color:#bbb;cursor:pointer;transition:background .12s,color .12s;user-select:none;}
-.chip:hover{background:#333;color:#fff;}
-.chip.on{background:rgba(17,141,255,.18);color:#60B4FF;}
-.chk{width:13px;height:13px;border:1.5px solid #555;border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .12s,border-color .12s;}
-.chip.on .chk{background:#118DFF;border-color:#118DFF;}
-.chip.on .chk::after{content:'✓';font-size:8.5px;color:#fff;line-height:1;}
+/* ─── Header ────────────────────────────────────────────── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--night);
+  display: flex;
+  align-items: center;
+  padding: 0 20px 0 0;
+  z-index: 200;
+  box-shadow: 0 2px 16px rgba(0,24,64,0.35);
+}
 
-/* MAIN */
-.main{flex:1;padding:18px 20px 40px;overflow:auto;min-width:0;}
-.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
-.ph h1{font-size:18px;font-weight:700;}
-.ph p{font-size:11.5px;color:var(--pbi-text-muted);margin-top:2px;}
-.af{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
-.af-lbl{font-size:10.5px;color:var(--pbi-text-muted);}
-.af-pill{background:#EFF6FF;border:1px solid #BFDBFE;color:#1D4ED8;border-radius:20px;padding:2px 10px;font-size:10.5px;font-weight:500;}
+.header-brand {
+  width: var(--sidebar-w);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 20px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  height: 100%;
+  flex-shrink: 0;
+}
 
-/* KPI */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:11px;margin-bottom:16px;}
-.kpi-card{background:var(--pbi-surface);border:1px solid var(--pbi-border);border-radius:4px;padding:15px 17px 13px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:box-shadow .2s;}
-.kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--kc,#118DFF);}
-.kpi-card:hover{box-shadow:var(--shadow-md);}
-.kpi-icon{width:32px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;background:var(--kb,#EFF6FF);margin-bottom:10px;}
-.kpi-icon svg{width:17px;height:17px;}
-.kpi-lbl{font-size:9.5px;font-weight:700;color:var(--pbi-text-muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px;}
-.kpi-val{font-size:26px;font-weight:700;color:var(--pbi-text);line-height:1;font-variant-numeric:tabular-nums;}
-.kpi-sub{font-size:10px;color:var(--pbi-text-muted);margin-top:5px;}
+.logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
 
-/* SECTION CARD */
-.sc{background:var(--pbi-surface);border:1px solid var(--pbi-border);border-radius:4px;box-shadow:var(--shadow);margin-bottom:16px;}
-.sc-head{display:flex;align-items:center;justify-content:space-between;padding:11px 17px;border-bottom:1px solid var(--pbi-border);flex-wrap:wrap;gap:8px;}
-.sc-title{font-size:13px;font-weight:700;color:var(--pbi-text);}
-.sc-sub{font-size:10.5px;color:var(--pbi-text-muted);}
-.sc-body{padding:14px 16px;overflow-x:auto;}
-.mt{display:flex;border:1px solid var(--pbi-border-dark);border-radius:3px;overflow:hidden;}
-.mt-btn{padding:5px 13px;font-size:11.5px;font-weight:600;background:var(--pbi-surface);color:var(--pbi-text-sec);border:none;cursor:pointer;font-family:var(--font);transition:background .12s,color .12s;border-right:1px solid var(--pbi-border-dark);}
-.mt-btn:last-child{border-right:none;}
-.mt-btn.on{background:#118DFF;color:#fff;}
-.mt-btn:hover:not(.on){background:var(--pbi-canvas);}
+.brand-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.brand-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
 
-/* HEATMAP */
-table.hm{border-collapse:separate;border-spacing:3px;width:100%;}
-table.hm th{font-size:9.5px;font-weight:700;color:var(--pbi-text-muted);text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;text-align:center;white-space:nowrap;}
-table.hm th.rhd{text-align:left;min-width:115px;}
-table.hm td.obn{font-size:11.5px;font-weight:600;color:var(--pbi-text);padding:2px 8px 2px 0;white-space:nowrap;}
-table.hm td.hmc{padding:2px 1px;text-align:center;}
-.cb{display:inline-flex;align-items:center;justify-content:center;min-width:64px;height:31px;border-radius:3px;font-size:11px;font-weight:600;transition:transform .1s,box-shadow .1s;cursor:default;width:100%;}
-.cb:hover{transform:scale(1.07);box-shadow:0 2px 8px rgba(0,0,0,.22);z-index:5;position:relative;}
-.tb{display:inline-flex;align-items:center;justify-content:center;min-width:64px;height:31px;border-radius:3px;width:100%;font-size:11px;font-weight:700;background:var(--pbi-canvas);border:1.5px solid var(--pbi-border-dark);color:var(--pbi-text);}
-.tb.grand{background:var(--pbi-dark);color:#fff;border-color:var(--pbi-dark);}
+.header-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 24px;
+  gap: 12px;
+}
 
-/* Heatmap cell colours */
-.ce{background:#FF0000;color:#fff;}          /* empty */
-.cb-low{background:#FFB3BA;color:#7B0000;}   /* below avg */
-.cb-near{background:#FFF2CC;color:#7A6000;}  /* near avg */
-.cb-avg{background:#92D050;color:#1D4D00;}   /* at avg */
-.cb-high{background:#00B050;color:#fff;}     /* above avg */
+.header-report-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.01em;
+}
 
-/* Legend */
-.leg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:11px;font-size:10.5px;color:var(--pbi-text-muted);}
-.li{display:flex;align-items:center;gap:4px;}
-.ls{width:20px;height:13px;border-radius:2px;}
+.header-badge {
+  background: rgba(107,143,196,0.2);
+  border: 1px solid rgba(107,143,196,0.3);
+  color: var(--sky);
+  border-radius: 99px;
+  padding: 2px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 
-/* Footer */
-.sc-foot{display:flex;align-items:center;justify-content:space-between;padding:7px 17px;border-top:1px solid var(--pbi-border);font-size:10px;color:var(--pbi-text-muted);}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-/* Tooltip */
-.tip{position:fixed;pointer-events:none;z-index:999;background:#252525;color:#fff;border-radius:4px;padding:7px 11px;font-size:11px;box-shadow:0 4px 14px rgba(0,0,0,.32);opacity:0;transition:opacity .1s;line-height:1.5;}
-.tip.show{opacity:1;}
+.hdr-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.75);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.hdr-btn:hover {
+  background: rgba(72,104,168,0.3);
+  border-color: rgba(107,143,196,0.4);
+  color: #fff;
+}
+.hdr-btn svg { width: 14px; height: 14px; }
 
-::-webkit-scrollbar{width:6px;height:6px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--pbi-border-dark);border-radius:3px;}
+.hdr-btn.primary {
+  background: var(--blue);
+  border-color: transparent;
+  color: #fff;
+}
+.hdr-btn.primary:hover {
+  background: #5a7bbf;
+}
 
-@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.a1{animation:fu .25s ease both}
-.a2{animation:fu .25s .05s ease both}
-.a3{animation:fu .25s .10s ease both}
-.a4{animation:fu .25s .15s ease both}
-.a5{animation:fu .25s .20s ease both}
-.a6{animation:fu .25s .25s ease both}
+/* ─── Sidebar ───────────────────────────────────────────── */
+.sidebar {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section {
+  padding: 16px 14px 8px;
+}
+.sidebar-section + .sidebar-section {
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding: 0 6px;
+}
+
+/* Navigation */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 2px;
+  position: relative;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+.nav-item:hover {
+  background: var(--ice);
+  color: var(--navy);
+}
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(72,104,168,0.12), rgba(107,143,196,0.08));
+  color: var(--blue);
+  border-color: rgba(72,104,168,0.18);
+  font-weight: 600;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -14px; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 20px;
+  background: var(--blue);
+  border-radius: 0 2px 2px 0;
+}
+.nav-icon {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ice);
+  flex-shrink: 0;
+}
+.nav-item.active .nav-icon {
+  background: rgba(72,104,168,0.14);
+}
+.nav-icon svg { width: 14px; height: 14px; }
+.nav-text { flex: 1; }
+.nav-short {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.nav-item.active .nav-short { color: rgba(72,104,168,0.6); }
+
+/* Filters */
+.filter-group { margin-bottom: 14px; }
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.filter-label svg { width: 12px; height: 12px; opacity: 0.6; }
+
+.filter-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface2);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a8fae' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: var(--shadow-glow);
+  background-color: var(--surface);
+}
+
+.metric-toggle {
+  display: flex;
+  background: var(--ice);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+.metric-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+.metric-btn.active {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: var(--shadow-xs);
+}
+.metric-btn:hover:not(.active) {
+  background: rgba(72,104,168,0.1);
+  color: var(--blue);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px;
+  border-top: 1px solid var(--border);
+}
+.filter-reset-btn {
+  width: 100%;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.filter-reset-btn:hover {
+  background: var(--danger-bg);
+  border-color: rgba(224,56,56,0.3);
+  color: var(--danger);
+}
+.filter-reset-btn svg { width: 13px; height: 13px; }
+
+/* ─── Main Content ───────────────────────────────────────── */
+.main {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--header-h);
+  min-height: calc(100vh - var(--header-h));
+}
+
+/* ─── Report Page ─────────────────────────────────────────── */
+.report-page {
+  display: none;
+  padding: 28px 28px 60px;
+  animation: fadeSlideIn 0.3s ease both;
+}
+.report-page.active { display: block; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Page Hero ──────────────────────────────────────────── */
+.page-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.page-hero-left {}
+.page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--night);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.page-sub {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.page-hero-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── KPI Grid ───────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition), transform var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--kpi-gradient, linear-gradient(90deg, var(--blue), var(--sky)));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.kpi-icon-wrap {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--kpi-icon-bg, var(--ice));
+  margin-bottom: 14px;
+}
+.kpi-icon-wrap svg { width: 18px; height: 18px; }
+.kpi-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--night);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.kpi-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 99px;
+  margin-top: 8px;
+}
+.kpi-delta.up { background: var(--success-bg); color: var(--success); }
+.kpi-delta.down { background: var(--danger-bg); color: var(--danger); }
+.kpi-delta svg { width: 10px; height: 10px; }
+
+/* ─── Section Card ──────────────────────────────────────── */
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: 10px;
+  background: linear-gradient(to right, rgba(232,240,250,0.4), transparent);
+}
+.section-title {
+  font-size: 14px; font-weight: 700;
+  color: var(--night);
+  letter-spacing: -0.01em;
+}
+.section-sub {
+  font-size: 11.5px; color: var(--text-muted);
+  margin-top: 2px;
+}
+.section-body {
+  padding: 20px 22px;
+  overflow-x: auto;
+}
+
+/* ─── Heatmap ────────────────────────────────────────────── */
+.hm-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+}
+.hm-table th {
+  font-family: var(--font);
+  font-size: 10.5px; font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+.hm-table th.row-header { text-align: left; }
+.hm-table td.ob-cell {
+  font-family: var(--mono);
+  font-size: 11.5px; font-weight: 500;
+  color: var(--text-primary);
+  padding: 4px 12px 4px 4px;
+  white-space: nowrap;
+}
+.hm-cell { padding: 0; text-align: center; vertical-align: middle; }
+.cell-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 68px; height: 34px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: transform 0.12s, box-shadow 0.12s;
+  cursor: default; width: 100%;
+}
+.cell-box:hover {
+  transform: scale(1.08);
+  z-index: 2; position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.cell-empty {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 68px; height: 34px;
+  border-radius: 6px;
+  background: var(--ice); color: var(--text-muted);
+  font-size: 11px; width: 100%;
+}
+.total-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 68px; height: 34px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11.5px; font-weight: 600;
+  background: var(--ice); color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  width: 100%;
+}
+
+.legend {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10.5px; color: var(--text-muted);
+}
+.legend-bar {
+  width: 120px; height: 8px;
+  border-radius: 99px;
+  background: linear-gradient(to right, #f8696b, #ffeb84, #63be7b);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* ─── 404 Placeholder ────────────────────────────────────── */
+.placeholder-wrapper {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-card {
+  text-align: center;
+  padding: 60px 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  max-width: 500px;
+  width: 100%;
+}
+
+.ph-icon-ring {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ice), rgba(232,240,250,0.5));
+  border: 2px dashed var(--border-strong);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  position: relative;
+}
+.ph-icon-ring::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(72,104,168,0.15);
+}
+.ph-icon-ring svg { width: 36px; height: 36px; opacity: 0.4; }
+
+.ph-code {
+  font-family: var(--mono);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--ice);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--blue), var(--sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.ph-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--night);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.ph-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 340px;
+  margin: 0 auto 24px;
+}
+.ph-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, rgba(72,104,168,0.08), rgba(107,143,196,0.06));
+  border: 1px solid rgba(72,104,168,0.18);
+  border-radius: 99px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--blue);
+  letter-spacing: 0.02em;
+}
+.ph-badge svg { width: 12px; height: 12px; }
+
+.ph-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.ph-chip {
+  padding: 5px 12px;
+  background: var(--ice);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ─── State Box ──────────────────────────────────────────── */
+.state-box {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 50px 20px;
+  color: var(--text-muted); font-size: 13px; gap: 10px;
+}
+.state-box svg { width: 32px; height: 32px; opacity: 0.3; }
+
+/* ─── Loading Spinner ─────────────────────────────────────── */
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--ice);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Export Dropdown ─────────────────────────────────────── */
+.export-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 180px;
+  z-index: 500;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.export-menu.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+.export-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.export-menu-item:hover { background: var(--ice); color: var(--blue); }
+.export-menu-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.export-menu-sep { height: 1px; background: var(--border); }
+
+.hdr-export-wrap { position: relative; }
+
+/* ─── Toast ──────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--night);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  font-size: 12.5px;
+  font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+  z-index: 9999;
+  max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+.anim { animation: fadeUp 0.35s ease both; }
+.anim-1 { animation-delay: 0.05s; }
+.anim-2 { animation-delay: 0.10s; }
+.anim-3 { animation-delay: 0.15s; }
+.anim-4 { animation-delay: 0.20s; }
+.anim-5 { animation-delay: 0.25s; }
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 220px; }
+  .kpi-value { font-size: 24px; }
+}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="tb-logo">
-    <svg viewBox="0 0 22 22" fill="none">
-      <rect x="1" y="1" width="9" height="9" rx="1" fill="#F2C811"/>
-      <rect x="12" y="1" width="9" height="9" rx="1" fill="#118DFF"/>
-      <rect x="1" y="12" width="9" height="9" rx="1" fill="#E66C37"/>
-      <rect x="12" y="12" width="9" height="9" rx="1" fill="#6B007B"/>
-    </svg>
-    <span class="tb-title">Sales KPI Dashboard</span>
+<!-- ═══════════════════════════════ HEADER ══════════════════════════════════ -->
+<header id="appHeader">
+  <div class="header-brand">
+    <img class="logo-img"
+         src="https://i.ibb.co/5XpmYYZz/image.png"
+         alt="Bunny's"
+         onerror="this.style.display='none';document.getElementById('fallbackLogo').style.display='flex'">
+    <div id="fallbackLogo" style="display:none;width:34px;height:34px;background:var(--blue);border-radius:8px;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 20 20" fill="none" width="18" height="18">
+        <circle cx="10" cy="8" r="4" fill="white" opacity=".9"/>
+        <ellipse cx="6" cy="5" rx="1.5" ry="3" fill="white" opacity=".7" transform="rotate(-15 6 5)"/>
+        <ellipse cx="14" cy="5" rx="1.5" ry="3" fill="white" opacity=".7" transform="rotate(15 14 5)"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">Bunny's</div>
+      <div class="brand-sub">Sales Intelligence</div>
+    </div>
   </div>
-  <div class="tb-sep"></div>
-  <span class="tb-sub">Rauf Sons Distribution</span>
-  <div class="tb-right">
-    <span class="tb-pill" id="recCount">— records</span>
-    <button class="tb-btn" onclick="resetAll()">↺ Reset Filters</button>
+
+  <div class="header-center">
+    <div class="header-report-name" id="headerReportName">Performance Overview</div>
+    <div class="header-badge" id="dateRangeBadge">Loading…</div>
   </div>
-</div>
 
-<div class="shell">
-
-  <!-- SIDENAV -->
-  <nav class="sidenav">
-    <div class="nav-lbl">Navigation</div>
-    <div class="nav-item active">
-      <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-      Overview
-    </div>
-    <div class="nav-div"></div>
-
-    <div class="fg">
-      <div class="fg-title">Distributor</div>
-      <div class="sel-all" onclick="selAll('dist')">Select all</div>
-      <div class="chip-wrap" id="distF"></div>
-    </div>
-    <div class="nav-div"></div>
-
-    <div class="fg">
-      <div class="fg-title">Week</div>
-      <div class="sel-all" onclick="selAll('week')">Select all</div>
-      <div class="chip-wrap" id="weekF"></div>
-    </div>
-    <div class="nav-div"></div>
-
-    <div class="fg">
-      <div class="fg-title">Channel</div>
-      <div class="sel-all" onclick="selAll('chan')">Select all</div>
-      <div class="chip-wrap" id="chanF"></div>
-    </div>
-  </nav>
-
-  <!-- MAIN -->
-  <main class="main">
-    <div class="ph a1">
-      <div>
-        <h1>Performance Overview</h1>
-        <p id="pSub">Loading…</p>
+  <div class="header-right">
+    <div class="hdr-export-wrap">
+      <button class="hdr-btn" id="exportToggleBtn" onclick="toggleExportMenu()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M8 1v9M5 7l3 3 3-3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke-linecap="round"/>
+        </svg>
+        Export
+        <svg viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M1 1l4 4 4-4"/>
+        </svg>
+      </button>
+      <div class="export-menu" id="exportMenu">
+        <div class="export-menu-item" onclick="exportExcel()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="1" width="14" height="14" rx="2"/>
+            <path d="M5 5l6 6M11 5l-6 6" stroke-linecap="round"/>
+          </svg>
+          Export to Excel
+        </div>
+        <div class="export-menu-sep"></div>
+        <div class="export-menu-item" onclick="exportImage()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+            <circle cx="5.5" cy="7" r="1.5"/>
+            <path d="M1 11l4-4 3 3 2-2 5 5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Export as Image
+        </div>
       </div>
-      <div class="af" id="afWrap"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════ SIDEBAR ══════════════════════════════════ -->
+<aside class="sidebar">
+
+  <!-- Navigation -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">Reports</div>
+
+    <div class="nav-item active" onclick="switchReport('overview')" data-report="overview">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.5">
+          <rect x="1" y="1" width="6" height="6" rx="1.5"/>
+          <rect x="9" y="1" width="6" height="6" rx="1.5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5"/>
+          <rect x="9" y="9" width="6" height="6" rx="1.5"/>
+        </svg>
+      </div>
+      <div class="nav-text">
+        <div>Day Wise Trends</div>
+        <div class="nav-short">Day Wise Trend</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="switchReport('tgt')" data-report="tgt">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+          <circle cx="8" cy="8" r="6.5"/>
+          <circle cx="8" cy="8" r="3.5"/>
+          <circle cx="8" cy="8" r="1"/>
+        </svg>
+      </div>
+      <div class="nav-text">
+        <div>Target vs Achievement</div>
+        <div class="nav-short">Ach vs Target</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="switchReport('incen')" data-report="incen">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+          <path d="M8 1v14M4 4l4-3 4 3" stroke-linecap="round"/>
+          <path d="M3 9h10" stroke-linecap="round"/>
+          <path d="M4 12h8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="nav-text">
+        <div>Sales Team Incentives</div>
+        <div class="nav-short">Sales Team Inc.</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="switchReport('lmt')" data-report="lmt">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+          <path d="M1 13l4-8 3 4 2-3 5 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="nav-text">
+        <div>LMT Stores</div>
+        <div class="nav-short">LMT</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="switchReport('ws')" data-report="ws">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+          <rect x="1" y="6" width="14" height="9" rx="1.5"/>
+          <path d="M4 6V4a4 4 0 018 0v2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="nav-text">
+        <div>WS Stores</div>
+        <div class="nav-short">WS</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="switchReport('stands')" data-report="stands">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+          <path d="M8 1v12M5 13h6" stroke-linecap="round"/>
+          <path d="M3 4h10l-1 5H4L3 4z" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="nav-text">
+        <div>Stands Outlets</div>
+        <div class="nav-short">Stands Outlets</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="switchReport('top20')" data-report="top20">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+          <path d="M8 2l1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6z" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="nav-text">
+        <div>Top N Outlets</div>
+        <div class="nav-short">Top N Stores</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">Global Filters</div>
+
+    <div class="filter-group">
+      <div class="filter-label">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M1 3h10M3 6h6M5 9h2" stroke-linecap="round"/>
+        </svg>
+        Category
+      </div>
+      <select class="filter-select" id="filterCategory" onchange="applyFilters()">
+        <option value="All">All Categories</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="6" cy="6" r="4.5"/>
+          <path d="M2 6h8M6 1.5c-1.5 1.5-1.5 7 0 9M6 1.5c1.5 1.5 1.5 7 0 9" stroke-linecap="round"/>
+        </svg>
+        Channel
+      </div>
+      <select class="filter-select" id="filterChannel" onchange="applyFilters()">
+        <option value="All">All Channels</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Metric</div>
+      <div class="metric-toggle">
+        <button class="metric-btn active" id="btnCtns" onclick="setMetric('ctns')">Sales CTN</button>
+        <button class="metric-btn" id="btnInv" onclick="setMetric('invoices')">Invoices</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="filter-reset-btn" onclick="resetFilters()">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 7A5 5 0 1 0 7 2" stroke-linecap="round"/>
+        <path d="M2 2v5h5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Reset Filters
+    </button>
+  </div>
+
+</aside>
+
+<!-- ══════════════════════════════ MAIN ══════════════════════════════════════ -->
+<main class="main" id="mainContent">
+
+  <!-- ── Report: Day Wise Trends (OVERVIEW) ── -->
+  <div class="report-page active" id="page-overview">
+    <div class="page-hero anim anim-1">
+      <div class="page-hero-left">
+        <div class="page-title">Day Wise Trends</div>
+        <div class="page-sub" id="pageSubtitle">Loading data…</div>
+      </div>
     </div>
 
     <div class="kpi-grid" id="kpiGrid">
-      <div class="kpi-card a2"><div style="height:70px;display:flex;align-items:center;justify-content:center;color:var(--pbi-text-muted);font-size:12px;">Loading…</div></div>
+      <div class="kpi-card anim anim-1"><div class="state-box"><div class="spinner"></div></div></div>
     </div>
 
-    <div class="sc a6">
-      <div class="sc-head">
+    <div class="section-card anim anim-4">
+      <div class="section-head">
         <div>
-          <div class="sc-title">Order Booker × Date Heatmap</div>
-          <div class="sc-sub" id="hmSub">—</div>
+          <div class="section-title">Order Booker × Date Heatmap</div>
+          <div class="section-sub" id="hmSubtitle">Loading…</div>
         </div>
-        <div class="mt">
-          <button class="mt-btn on" id="bCtns" onclick="setM('ctns')">Sales CTN</button>
-          <button class="mt-btn" id="bInv" onclick="setM('inv')">Invoice Count</button>
-        </div>
-      </div>
-      <div class="sc-body">
-        <div id="hmC"><div style="padding:40px;text-align:center;color:var(--pbi-text-muted);">Loading…</div></div>
-        <div class="leg">
-          <strong style="font-size:10px;color:var(--pbi-text-sec);margin-right:2px;">Legend:</strong>
-          <div class="li"><div class="ls ce" style="border-radius:2px;"></div><span>No data (empty)</span></div>
-          <div class="li"><div class="ls" style="background:#FFB3BA;border-radius:2px;"></div><span>Below average</span></div>
-          <div class="li"><div class="ls" style="background:#FFF2CC;border:1px solid #e0d090;border-radius:2px;"></div><span>Near average (±10%)</span></div>
-          <div class="li"><div class="ls" style="background:#92D050;border-radius:2px;"></div><span>At / above average</span></div>
-          <div class="li"><div class="ls" style="background:#00B050;border-radius:2px;"></div><span>High (+10%)</span></div>
+        <div class="legend">
+          <span>Low</span>
+          <div class="legend-bar"></div>
+          <span>High</span>
         </div>
       </div>
-      <div class="sc-foot">
-        <span id="fL">—</span>
-        <span id="fR">—</span>
+      <div class="section-body">
+        <div id="hmContainer"><div class="state-box"><div class="spinner"></div></div></div>
       </div>
     </div>
-  </main>
+  </div>
+
+  <!-- ── Placeholder Reports ── -->
+  <div class="report-page" id="page-tgt">
+    <div class="page-hero anim anim-1">
+      <div class="page-hero-left">
+        <div class="page-title">Target vs Achievement</div>
+        <div class="page-sub">Sales performance against set targets</div>
+      </div>
+    </div>
+    <div class="placeholder-wrapper anim anim-2">
+      <div class="placeholder-card">
+        <div class="ph-icon-ring">
+          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
+            <circle cx="18" cy="18" r="15"/><circle cx="18" cy="18" r="8"/><circle cx="18" cy="18" r="2"/>
+          </svg>
+        </div>
+        <div class="ph-code">404</div>
+        <div class="ph-title">Report Under Construction</div>
+        <div class="ph-desc">The <strong>Target vs Achievement</strong> report is being built. It will display sales performance metrics compared to set targets across all channels and categories.</div>
+        <div class="ph-badge">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
+          Coming Soon
+        </div>
+        <div class="ph-chips">
+          <span class="ph-chip">Ach vs Target</span>
+          <span class="ph-chip">Channel Breakdown</span>
+          <span class="ph-chip">SKU Level</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page" id="page-incen">
+    <div class="page-hero anim anim-1">
+      <div class="page-hero-left">
+        <div class="page-title">Sales Team Incentives</div>
+        <div class="page-sub">Individual performance & incentive calculations</div>
+      </div>
+    </div>
+    <div class="placeholder-wrapper anim anim-2">
+      <div class="placeholder-card">
+        <div class="ph-icon-ring">
+          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
+            <path d="M18 4v28M8 10l10-6 10 6"/><path d="M6 22h24"/><path d="M8 26h20"/>
+          </svg>
+        </div>
+        <div class="ph-code">404</div>
+        <div class="ph-title">Report Under Construction</div>
+        <div class="ph-desc">The <strong>Sales Team Incentives</strong> report will show OB-level performance scores, incentive tiers, and payout calculations based on CTN and invoice targets.</div>
+        <div class="ph-badge">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
+          Coming Soon
+        </div>
+        <div class="ph-chips">
+          <span class="ph-chip">Sales Team Inc.</span>
+          <span class="ph-chip">OB Rankings</span>
+          <span class="ph-chip">Incentive Tiers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page" id="page-lmt">
+    <div class="page-hero anim anim-1">
+      <div class="page-hero-left">
+        <div class="page-title">LMT Stores</div>
+        <div class="page-sub">Large Modern Trade store performance</div>
+      </div>
+    </div>
+    <div class="placeholder-wrapper anim anim-2">
+      <div class="placeholder-card">
+        <div class="ph-icon-ring">
+          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
+            <path d="M4 30V12l14-8 14 8v18H4z"/><rect x="13" y="18" width="10" height="12" rx="1"/>
+          </svg>
+        </div>
+        <div class="ph-code">404</div>
+        <div class="ph-title">Report Under Construction</div>
+        <div class="ph-desc">The <strong>LMT Stores</strong> report will cover Large Modern Trade outlets with volume trends, SKU penetration, and shelf performance analytics.</div>
+        <div class="ph-badge">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
+          Coming Soon
+        </div>
+        <div class="ph-chips">
+          <span class="ph-chip">LMT</span>
+          <span class="ph-chip">Store Analytics</span>
+          <span class="ph-chip">SKU Depth</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page" id="page-ws">
+    <div class="page-hero anim anim-1">
+      <div class="page-hero-left">
+        <div class="page-title">WS Stores</div>
+        <div class="page-sub">Wholesale store network performance</div>
+      </div>
+    </div>
+    <div class="placeholder-wrapper anim anim-2">
+      <div class="placeholder-card">
+        <div class="ph-icon-ring">
+          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
+            <rect x="4" y="14" width="28" height="18" rx="2"/>
+            <path d="M10 14V9a8 8 0 0116 0v5"/>
+          </svg>
+        </div>
+        <div class="ph-code">404</div>
+        <div class="ph-title">Report Under Construction</div>
+        <div class="ph-desc">The <strong>WS Stores</strong> report will provide wholesale channel insights including volume velocity, outlet coverage, and order frequency analytics.</div>
+        <div class="ph-badge">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
+          Coming Soon
+        </div>
+        <div class="ph-chips">
+          <span class="ph-chip">WS</span>
+          <span class="ph-chip">Wholesale</span>
+          <span class="ph-chip">Coverage Map</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page" id="page-stands">
+    <div class="page-hero anim anim-1">
+      <div class="page-hero-left">
+        <div class="page-title">Stands Outlets</div>
+        <div class="page-sub">Stand-based outlet sales and coverage</div>
+      </div>
+    </div>
+    <div class="placeholder-wrapper anim anim-2">
+      <div class="placeholder-card">
+        <div class="ph-icon-ring">
+          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
+            <path d="M18 4v26M12 30h12"/><path d="M7 9h22l-2 12H9L7 9z"/>
+          </svg>
+        </div>
+        <div class="ph-code">404</div>
+        <div class="ph-title">Report Under Construction</div>
+        <div class="ph-desc">The <strong>Stands Outlets</strong> report will track kiosk and stand-based retail performance, footfall conversion, and product placement effectiveness.</div>
+        <div class="ph-badge">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
+          Coming Soon
+        </div>
+        <div class="ph-chips">
+          <span class="ph-chip">Stands Outlets</span>
+          <span class="ph-chip">Kiosk Data</span>
+          <span class="ph-chip">Placement</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page" id="page-top20">
+    <div class="page-hero anim anim-1">
+      <div class="page-hero-left">
+        <div class="page-title">Top N Outlets</div>
+        <div class="page-sub">Highest performing outlets ranked by volume</div>
+      </div>
+    </div>
+    <div class="placeholder-wrapper anim anim-2">
+      <div class="placeholder-card">
+        <div class="ph-icon-ring">
+          <svg viewBox="0 0 36 36" fill="none" stroke="var(--blue)" stroke-width="2">
+            <path d="M18 5l2.5 7.5H28l-6.5 4.7 2.5 7.5-6.5-4.7-6.5 4.7 2.5-7.5L7 12.5h7.5z"/>
+          </svg>
+        </div>
+        <div class="ph-code">404</div>
+        <div class="ph-title">Report Under Construction</div>
+        <div class="ph-desc">The <strong>Top N Outlets</strong> report will surface your best-performing stores dynamically ranked by CTN volume, invoice frequency, and SKU breadth.</div>
+        <div class="ph-badge">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 3v3l2 1" stroke-linecap="round"/></svg>
+          Coming Soon
+        </div>
+        <div class="ph-chips">
+          <span class="ph-chip">Top N Stores</span>
+          <span class="ph-chip">Dynamic N</span>
+          <span class="ph-chip">Rankings</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ Toast ══ -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="M2 8l4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span id="toastMsg">Done!</span>
 </div>
 
-<div class="tip" id="tip"></div>
-
 <script>
-/* ── data & state ── */
-let D=[], metric='ctns';
-let sDist=new Set(), sWeek=new Set(), sChan=new Set();
-const WK=['Week 1','Week 2','Week 3','Week 4','Week 5'];
-const u=a=>[...new Set(a)];
-const sm=a=>a.reduce((s,v)=>s+v,0);
-const av=a=>a.length?sm(a)/a.length:0;
-const wk=ds=>{const d=new Date(ds);return Math.min(Math.ceil(d.getDate()/7),5);};
-const fmt=v=>currentMetric==='ctns'?Number(v).toFixed(2):Number(v);
-let currentMetric='ctns';
-
-fetch('data.json').then(r=>r.json()).then(data=>{
-  D=data.map(r=>({...r,_w:wk(r['Date'])}));
-  u(D.map(r=>r['Distributor Name'])).sort().forEach(v=>sDist.add(v));
-  u(D.map(r=>r._w)).sort((a,b)=>a-b).forEach(v=>sWeek.add(v));
-  u(D.map(r=>r['Channel'])).sort().forEach(v=>sChan.add(v));
-  buildNav();render();
-}).catch(()=>{
-  document.getElementById('hmC').innerHTML='<div style="padding:40px;text-align:center;color:red;">Could not load data.json</div>';
-});
-
-/* ── nav ── */
-function buildNav(){
-  buildChips('distF', u(D.map(r=>r['Distributor Name'])).sort(), sDist, v=>tog(sDist,v,'distF'));
-  buildChips('weekF', u(D.map(r=>r._w)).sort((a,b)=>a-b).map(v=>({v,l:WK[v-1]})), sWeek, v=>tog(sWeek,Number(v),'weekF'), true);
-  buildChips('chanF', u(D.map(r=>r['Channel'])).sort(), sChan, v=>tog(sChan,v,'chanF'));
+/* ─── Helpers ───────────────────────────────────────────── */
+function groupBy(arr, key) {
+  return arr.reduce((m, v) => { (m[v[key]] = m[v[key]] || []).push(v); return m; }, {});
+}
+function unique(arr) { return [...new Set(arr)]; }
+function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
+function avg(arr) { return arr.length ? sum(arr) / arr.length : 0; }
+function fmt(n, d) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toFixed(d !== undefined ? d : 2);
+}
+function fmtDate(d) {
+  const [y, m, day] = d.split('-');
+  return `${day}/${m}`;
 }
 
-function buildChips(id,items,set,cb,isObj=false){
-  document.getElementById(id).innerHTML=items.map(item=>{
-    const val=isObj?item.v:item, lbl=isObj?item.l:item;
-    return `<div class="chip ${set.has(val)?'on':''}" data-v="${val}" onclick="(${cb.toString()})('${val}')">
-      <div class="chk"></div><span>${lbl}</span></div>`;
-  }).join('');
+function rdYlGn(t) {
+  t = Math.max(0, Math.min(1, t));
+  let r, g, b;
+  if (t < 0.5) {
+    const s = t / 0.5;
+    r = Math.round(248 + (255 - 248) * s);
+    g = Math.round(105 + (235 - 105) * s);
+    b = Math.round(107 + (132 - 107) * s);
+  } else {
+    const s = (t - 0.5) / 0.5;
+    r = Math.round(255 + (99 - 255) * s);
+    g = Math.round(235 + (190 - 235) * s);
+    b = Math.round(132 + (123 - 132) * s);
+  }
+  return `rgb(${r},${g},${b})`;
 }
 
-function tog(set,val,id){
-  const key=typeof [...set][0]==='number'?Number(val):val;
-  set.has(key)?set.delete(key):set.add(key);
-  document.getElementById(id).querySelectorAll('.chip').forEach(c=>{
-    const k=typeof key==='number'?Number(c.dataset.v):c.dataset.v;
-    c.classList.toggle('on',set.has(k));
+function textColor(bgRgb) {
+  const m = bgRgb.match(/\d+/g).map(Number);
+  const [r, g, b] = m.map(c => {
+    c /= 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   });
-  render();
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return L > 0.35 ? '#0d1b35' : '#ffffff';
 }
 
-function selAll(f){
-  if(f==='dist'){u(D.map(r=>r['Distributor Name'])).forEach(v=>sDist.add(v));refreshChips('distF');}
-  if(f==='week'){u(D.map(r=>r._w)).forEach(v=>sWeek.add(v));refreshChips('weekF');}
-  if(f==='chan'){u(D.map(r=>r['Channel'])).forEach(v=>sChan.add(v));refreshChips('chanF');}
-  render();
-}
-function refreshChips(id){document.getElementById(id).querySelectorAll('.chip').forEach(c=>c.classList.add('on'));}
-function resetAll(){selAll('dist');selAll('week');selAll('chan');}
-
-/* ── metric ── */
-function setM(m){
-  currentMetric=m;metric=m;
-  document.getElementById('bCtns').classList.toggle('on',m==='ctns');
-  document.getElementById('bInv').classList.toggle('on',m==='inv');
-  render();
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.style.background = isError ? '#c0392b' : 'var(--night)';
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* ── filter ── */
-function fd(){return D.filter(r=>sDist.has(r['Distributor Name'])&&sWeek.has(r._w)&&sChan.has(r['Channel']));}
+/* ─── State ─────────────────────────────────────────────── */
+let allData = [];
+let currentMetric = 'ctns';
+let currentCategory = 'All';
+let currentChannel = 'All';
+let currentReport = 'overview';
 
-/* ── render ── */
-function render(){
-  const data=fd();
-  const dates=u(data.map(r=>r['Date'])).sort();
-  const obs=u(data.map(r=>r['Order Booker Code'])).sort();
-  document.getElementById('recCount').textContent=`${data.length.toLocaleString()} records`;
-  document.getElementById('pSub').textContent=`${data.length} records · ${obs.length} order booker${obs.length!==1?'s':''} · ${dates.length} date${dates.length!==1?'s':''}`;
+const REPORT_NAMES = {
+  overview: 'Day Wise Trends',
+  tgt:      'Target vs Achievement',
+  incen:    'Sales Team Incentives',
+  lmt:      'LMT Stores',
+  ws:       'WS Stores',
+  stands:   'Stands Outlets',
+  top20:    'Top N Outlets'
+};
 
-  // active filters
-  const pills=[];
-  const allDist=u(D.map(r=>r['Distributor Name']));
-  const allWk=u(D.map(r=>r._w));
-  const allChan=u(D.map(r=>r['Channel']));
-  if(sDist.size<allDist.length) pills.push([...sDist].join(', '));
-  if(sWeek.size<allWk.length) pills.push([...sWeek].sort((a,b)=>a-b).map(w=>WK[w-1]).join(', '));
-  if(sChan.size<allChan.length) pills.push([...sChan].join(', '));
-  document.getElementById('afWrap').innerHTML=pills.length
-    ?`<span class="af-lbl">Filtered by:</span>${pills.map(p=>`<span class="af-pill">${p}</span>`).join('')}`:'' ;
-
-  renderKPIs(data,dates,obs);
-  renderHM(data,dates,obs);
-}
-
-/* ── KPIs ── */
-function renderKPIs(data,dates,obs){
-  const bd={};dates.forEach(d=>bd[d]=data.filter(r=>r['Date']===d));
-  const dCtns=dates.map(d=>sm(bd[d].map(r=>r['Sales CTN'])));
-  const dInv=dates.map(d=>u(bd[d].map(r=>r['Invoice Number'])).length);
-  const dObs=dates.map(d=>u(bd[d].map(r=>r['Order Booker Code'])).length);
-  const dSku=dates.map(d=>{
-    const bo={};bd[d].forEach(r=>(bo[r['Outlet Code']]=bo[r['Outlet Code']]||[]).push(r));
-    const c=Object.values(bo).map(rows=>u(rows.map(r=>r['SKU Code'])).length);
-    return c.length?av(c):0;
+/* ─── Navigation ─────────────────────────────────────────── */
+function switchReport(id) {
+  currentReport = id;
+  document.querySelectorAll('.report-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    const isActive = n.dataset.report === id;
+    n.classList.toggle('active', isActive);
+    const icon = n.querySelector('.nav-icon svg');
+    if (icon) {
+      icon.setAttribute('stroke', isActive ? 'var(--blue)' : 'var(--text-muted)');
+    }
   });
-  const kpis=[
-    {l:'Avg Daily Volume',v:av(dCtns).toFixed(2)+' CTN',s:'Sales cartons per day',c:'#118DFF',b:'#EFF6FF',
-     i:`<svg viewBox="0 0 18 18" fill="none" stroke="#118DFF" stroke-width="1.5"><path d="M9 1L16 5V13L9 17L2 13V5Z"/><line x1="9" y1="1" x2="9" y2="17"/><line x1="2" y1="5" x2="16" y2="5"/><line x1="2" y1="13" x2="16" y2="13"/></svg>`},
-    {l:'Avg Invoice Count',v:av(dInv).toFixed(1),s:'Unique invoices per day',c:'#E66C37',b:'#FEF3EC',
-     i:`<svg viewBox="0 0 18 18" fill="none" stroke="#E66C37" stroke-width="1.5"><rect x="3" y="1" width="11" height="16" rx="1.5"/><line x1="6" y1="6" x2="12" y2="6"/><line x1="6" y1="9" x2="12" y2="9"/><line x1="6" y1="12" x2="9" y2="12"/></svg>`},
-    {l:'Avg OB Operated',v:av(dObs).toFixed(1),s:'Order bookers active / day',c:'#00B050',b:'#F0FFF4',
-     i:`<svg viewBox="0 0 18 18" fill="none" stroke="#00B050" stroke-width="1.5"><circle cx="7" cy="6" r="3"/><path d="M1 16c0-4 3-6 6-6"/><circle cx="14" cy="7" r="2.5"/><path d="M12 16c0-3 1.5-4.5 3.5-4.5"/></svg>`},
-    {l:'Avg SKU / Shop',v:av(dSku).toFixed(1),s:'Unique SKUs per outlet',c:'#F2C811',b:'#FFFDF0',
-     i:`<svg viewBox="0 0 18 18" fill="none" stroke="#F2C811" stroke-width="1.5"><rect x="2" y="9" width="4" height="7" rx="1"/><rect x="7" y="6" width="4" height="10" rx="1"/><rect x="12" y="2" width="4" height="14" rx="1"/></svg>`},
-  ];
-  document.getElementById('kpiGrid').innerHTML=kpis.map((k,i)=>`
-    <div class="kpi-card a${i+2}" style="--kc:${k.c};--kb:${k.b};">
-      <div class="kpi-icon">${k.i}</div>
-      <div class="kpi-lbl">${k.l}</div>
-      <div class="kpi-val">${k.v}</div>
-      <div class="kpi-sub">${k.s}</div>
-    </div>`).join('');
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  document.getElementById('headerReportName').textContent = REPORT_NAMES[id] || id;
+  if (id === 'overview') render();
+  closeExportMenu();
 }
 
-/* ── Heatmap ── */
-function renderHM(data,dates,obs){
-  const ml=currentMetric==='ctns'?'Sales CTN':'Invoice Count';
-  document.getElementById('hmSub').textContent=`${ml} · ${obs.length} OB${obs.length!==1?'s':''} × ${dates.length} date${dates.length!==1?'s':''}`;
+/* ─── Filters ────────────────────────────────────────────── */
+function initFilters() {
+  const categories = ['All', ...unique(allData.map(d => d['Category'] || d['category'] || '').filter(Boolean))];
+  const channels   = ['All', ...unique(allData.map(d => d['Channel']))];
 
-  const matrix=obs.map(ob=>dates.map(dt=>{
-    const rows=data.filter(r=>r['Order Booker Code']===ob&&r['Date']===dt);
-    if(!rows.length)return null;
-    return currentMetric==='ctns'?sm(rows.map(r=>r['Sales CTN'])):u(rows.map(r=>r['Invoice Number'])).length;
-  }));
+  const catSel = document.getElementById('filterCategory');
+  const chnSel = document.getElementById('filterChannel');
 
-  const flat=matrix.flat().filter(v=>v!==null);
-  const globalAvg=flat.length?av(flat):0;
-  const nearLo=globalAvg*0.90, nearHi=globalAvg*1.10;
+  catSel.innerHTML = categories.map(c => `<option value="${c}">${c === 'All' ? 'All Categories' : c}</option>`).join('');
+  chnSel.innerHTML = channels.map(c =>   `<option value="${c}">${c === 'All' ? 'All Channels'   : c}</option>`).join('');
+}
 
-  function cls(v){
-    if(v===null)return 'ce';
-    if(v<nearLo)return 'cb-low';
-    if(v<globalAvg)return 'cb-near';
-    if(v<=nearHi)return 'cb-avg';
-    return 'cb-high';
+function applyFilters() {
+  currentCategory = document.getElementById('filterCategory').value;
+  currentChannel  = document.getElementById('filterChannel').value;
+  if (currentReport === 'overview') render();
+}
+
+function resetFilters() {
+  currentCategory = 'All';
+  currentChannel  = 'All';
+  currentMetric   = 'ctns';
+  document.getElementById('filterCategory').value = 'All';
+  document.getElementById('filterChannel').value  = 'All';
+  document.getElementById('btnCtns').classList.add('active');
+  document.getElementById('btnInv').classList.remove('active');
+  if (currentReport === 'overview') render();
+  showToast('Filters reset');
+}
+
+function setMetric(m) {
+  currentMetric = m;
+  document.getElementById('btnCtns').classList.toggle('active', m === 'ctns');
+  document.getElementById('btnInv').classList.toggle('active', m === 'invoices');
+  if (currentReport === 'overview') render();
+}
+
+function getFilteredData() {
+  return allData.filter(d => {
+    if (currentCategory !== 'All' && d['Category'] !== currentCategory) return false;
+    if (currentChannel  !== 'All' && d['Channel']  !== currentChannel)  return false;
+    return true;
+  });
+}
+
+/* ─── Main Render ────────────────────────────────────────── */
+function render() {
+  const data  = getFilteredData();
+  const dates = unique(data.map(d => d['Date'])).sort();
+  const obs   = unique(data.map(d => d['Order Booker Code'])).sort();
+
+  if (dates.length) {
+    const f = d => { const [y, m, day] = d.split('-'); return `${day}/${m}/${y}`; };
+    document.getElementById('dateRangeBadge').textContent =
+      dates.length === 1 ? f(dates[0]) : `${f(dates[0])} – ${f(dates[dates.length - 1])}`;
   }
 
-  const df=d=>{const[,m,dy]=d.split('-');return`${dy}/${m}`;};
-  const wkLbl=d=>`<span style="font-size:8.5px;font-weight:400;text-transform:none;letter-spacing:0;display:block;">${WK[wk(d)-1]}</span>`;
+  const catTxt = currentCategory === 'All' ? 'All Categories' : currentCategory;
+  const chnTxt = currentChannel  === 'All' ? 'All Channels'   : currentChannel;
+  document.getElementById('pageSubtitle').textContent =
+    `${data.length} records · ${obs.length} order booker${obs.length !== 1 ? 's' : ''} · ${dates.length} day${dates.length !== 1 ? 's' : ''} · ${catTxt} · ${chnTxt}`;
 
-  let html=`<table class="hm"><thead><tr><th class="rhd">OB Code</th>${dates.map(d=>`<th>${df(d)}${wkLbl(d)}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
+  renderKPIs(data, dates, obs);
+  renderHeatmap(data, dates, obs);
+}
 
-  const rowTotals=[];
-  obs.forEach((ob,oi)=>{
-    const rv=matrix[oi];
-    const rt=sm(rv.filter(v=>v!==null));
-    rowTotals.push(rt);
-    html+=`<tr><td class="obn">${ob}</td>`;
-    dates.forEach((dt,di)=>{
-      const v=rv[di];
-      const c=cls(v);
-      const disp=v===null?'—':(currentMetric==='ctns'?v.toFixed(2):v);
-      const wv=currentMetric==='ctns'?globalAvg.toFixed(2):Math.round(globalAvg);
-      html+=`<td class="hmc"><span class="cb ${c}" onmouseenter="sTip(event,'${ob}','${dt}','${disp}','${wv}')" onmouseleave="hTip()">${disp}</span></td>`;
+/* ─── KPIs ───────────────────────────────────────────────── */
+function renderKPIs(data, dates, obs) {
+  const byDate   = groupBy(data, 'Date');
+  const dailyCtns  = dates.map(d => sum(byDate[d].map(r => r['Sales CTN'])));
+  const dailyInvs  = dates.map(d => unique(byDate[d].map(r => r['Invoice Number'])).length);
+  const dailyObs   = dates.map(d => unique(byDate[d].map(r => r['Order Booker Code'])).length);
+  const dailySku   = dates.map(d => {
+    const byOutlet = groupBy(byDate[d], 'Outlet Code');
+    const counts   = Object.values(byOutlet).map(rows => unique(rows.map(r => r['SKU Code'])).length);
+    return avg(counts);
+  });
+
+  const kpis = [
+    {
+      label: 'Avg Daily Volume',
+      value: avg(dailyCtns).toFixed(1) + ' CTN',
+      sub:   'Sales cartons per day',
+      gradient: 'linear-gradient(90deg, #4868A8, #6B8FC4)',
+      iconBg: 'rgba(72,104,168,0.1)',
+      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#4868A8" stroke-width="1.6">
+        <rect x="2" y="9" width="3" height="7" rx="1"/>
+        <rect x="7" y="6" width="3" height="10" rx="1"/>
+        <rect x="12" y="2" width="3" height="14" rx="1"/>
+      </svg>`
+    },
+    {
+      label: 'Avg Invoice Count',
+      value: avg(dailyInvs).toFixed(1),
+      sub:   'Unique invoices per day',
+      gradient: 'linear-gradient(90deg, #1C3D7A, #4868A8)',
+      iconBg: 'rgba(28,61,122,0.1)',
+      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#1C3D7A" stroke-width="1.6">
+        <rect x="3" y="1" width="12" height="16" rx="2"/>
+        <path d="M6 6h6M6 9h6M6 12h4" stroke-linecap="round"/>
+      </svg>`
+    },
+    {
+      label: 'Avg OB Operated',
+      value: avg(dailyObs).toFixed(1),
+      sub:   'Order bookers active / day',
+      gradient: 'linear-gradient(90deg, #059669, #34d399)',
+      iconBg: 'rgba(5,150,105,0.1)',
+      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#059669" stroke-width="1.6">
+        <circle cx="7" cy="6" r="3"/>
+        <path d="M1 16c0-3 2.5-5.5 6-5.5"/>
+        <circle cx="14" cy="7" r="2.5"/>
+        <path d="M11.5 16c0-2.5 1.5-4 3.5-4.5" stroke-linecap="round"/>
+      </svg>`
+    },
+    {
+      label: 'Avg SKU / Shop',
+      value: avg(dailySku).toFixed(1),
+      sub:   'Unique SKUs per outlet',
+      gradient: 'linear-gradient(90deg, #d97706, #fbbf24)',
+      iconBg: 'rgba(217,119,6,0.1)',
+      icon: `<svg viewBox="0 0 18 18" fill="none" stroke="#d97706" stroke-width="1.6">
+        <path d="M9 1L16 5v8L9 17 2 13V5z" stroke-linejoin="round"/>
+        <path d="M9 1v16M2 5l7 4 7-4" stroke-linecap="round"/>
+      </svg>`
+    }
+  ];
+
+  document.getElementById('kpiGrid').innerHTML = kpis.map((k, i) => `
+    <div class="kpi-card anim anim-${i + 1}" style="--kpi-gradient:${k.gradient};">
+      <div class="kpi-icon-wrap" style="background:${k.iconBg};">${k.icon}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>
+  `).join('');
+}
+
+/* ─── Heatmap ────────────────────────────────────────────── */
+function renderHeatmap(data, dates, obs) {
+  const metricLabel = currentMetric === 'ctns' ? 'Sales CTN' : 'Invoice Count';
+  document.getElementById('hmSubtitle').textContent =
+    `${metricLabel} · ${obs.length} OB${obs.length !== 1 ? 's' : ''} × ${dates.length} date${dates.length !== 1 ? 's' : ''}`;
+
+  const matrix = obs.map(ob => dates.map(date => {
+    const rows = data.filter(r => r['Order Booker Code'] === ob && r['Date'] === date);
+    if (!rows.length) return null;
+    if (currentMetric === 'ctns') return sum(rows.map(r => r['Sales CTN']));
+    return unique(rows.map(r => r['Invoice Number'])).length;
+  }));
+
+  const rowTotals = matrix.map(row => sum(row.filter(v => v !== null)));
+  const flat = matrix.flat().filter(v => v !== null);
+  const minV = flat.length ? Math.min(...flat) : 0;
+  const maxV = flat.length ? Math.max(...flat) : 1;
+
+  if (!flat.length) {
+    document.getElementById('hmContainer').innerHTML =
+      '<div class="state-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9 9h.01M15 9h.01M9 15h6" stroke-linecap="round"/></svg><span>No data matches the current filters.</span></div>';
+    return;
+  }
+
+  let html = `<table class="hm-table">
+    <thead><tr>
+      <th class="row-header">OB Code</th>
+      ${dates.map(d => `<th>${fmtDate(d)}</th>`).join('')}
+      <th>Total</th>
+    </tr></thead>
+    <tbody>`;
+
+  obs.forEach((ob, oi) => {
+    html += `<tr><td class="ob-cell">${ob}</td>`;
+    dates.forEach((_, di) => {
+      const v = matrix[oi][di];
+      if (v === null) {
+        html += `<td class="hm-cell"><span class="cell-empty">—</span></td>`;
+      } else {
+        const t  = maxV === minV ? 0.5 : (v - minV) / (maxV - minV);
+        const bg = rdYlGn(t);
+        const tc = textColor(bg);
+        const display = currentMetric === 'ctns' ? fmt(v, 2) : v;
+        html += `<td class="hm-cell"><span class="cell-box" style="background:${bg};color:${tc}" title="${ob} · ${dates[di]} · ${display}">${display}</span></td>`;
+      }
     });
-    const rtd=currentMetric==='ctns'?rt.toFixed(2):rt;
-    html+=`<td class="hmc"><span class="tb">${rtd}</span></td></tr>`;
+    const rt = rowTotals[oi];
+    html += `<td class="total-cell"><span class="total-box">${currentMetric === 'ctns' ? fmt(rt, 2) : rt}</span></td>`;
+    html += `</tr>`;
   });
 
-  // column totals
-  html+=`<tr><td class="obn" style="color:var(--pbi-text-muted);font-size:10px;font-weight:700;">Column Total</td>`;
-  let grand=0;
-  dates.forEach((_,di)=>{
-    const cv=matrix.map(r=>r[di]).filter(v=>v!==null);
-    const cs=sm(cv); grand+=cs;
-    const d=currentMetric==='ctns'?cs.toFixed(2):cs;
-    html+=`<td class="hmc"><span class="tb">${d}</span></td>`;
+  html += `<tr><td class="ob-cell" style="font-weight:700;color:var(--text-muted);">Total</td>`;
+  dates.forEach((_, di) => {
+    const colVals = matrix.map(row => row[di]).filter(v => v !== null);
+    const colSum  = sum(colVals);
+    html += `<td class="total-cell"><span class="total-box" style="font-weight:700;">${currentMetric === 'ctns' ? fmt(colSum, 2) : colSum}</span></td>`;
   });
-  const gd=currentMetric==='ctns'?grand.toFixed(2):grand;
-  html+=`<td class="hmc"><span class="tb grand">${gd}</span></td></tr></tbody></table>`;
+  const grand = sum(rowTotals);
+  html += `<td class="total-cell"><span class="total-box" style="font-weight:800;border-color:var(--blue);color:var(--blue);">${currentMetric === 'ctns' ? fmt(grand, 2) : grand}</span></td>`;
+  html += `</tr></tbody></table>`;
 
-  document.getElementById('hmC').innerHTML=html;
-  const nullCount=matrix.flat().filter(v=>v===null).length;
-  document.getElementById('fL').textContent=`Global avg: ${currentMetric==='ctns'?globalAvg.toFixed(3):globalAvg.toFixed(1)} · Near-avg band: ±10%`;
-  document.getElementById('fR').textContent=`${flat.length} filled · ${nullCount} empty cells`;
+  document.getElementById('hmContainer').innerHTML = html;
 }
 
-/* ── tooltip ── */
-function sTip(e,ob,dt,val,avg){
-  const t=document.getElementById('tip');
-  t.innerHTML=`<strong>${ob}</strong><br>Date: ${dt}<br>Value: <strong>${val}</strong><br>Global avg: ${avg}`;
-  t.classList.add('show');mv(e);
+/* ─── Export Menu ────────────────────────────────────────── */
+function toggleExportMenu() {
+  document.getElementById('exportMenu').classList.toggle('open');
 }
-function hTip(){document.getElementById('tip').classList.remove('show');}
-document.addEventListener('mousemove',e=>{if(document.getElementById('tip').classList.contains('show'))mv(e);});
-function mv(e){const t=document.getElementById('tip');const x=e.clientX+14,y=e.clientY-10;t.style.left=(x+190>window.innerWidth?x-210:x)+'px';t.style.top=y+'px';}
+function closeExportMenu() {
+  document.getElementById('exportMenu').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.hdr-export-wrap')) closeExportMenu();
+});
+
+/* ─── Export Excel ───────────────────────────────────────── */
+function exportExcel() {
+  closeExportMenu();
+  const data = getFilteredData();
+  if (!data.length) { showToast('No data to export', true); return; }
+
+  const headers = Object.keys(data[0]);
+  const rows = [headers, ...data.map(r => headers.map(h => r[h]))];
+  const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `bunnys-${REPORT_NAMES[currentReport].replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Excel export ready ✓');
+}
+
+/* ─── Export Image ───────────────────────────────────────── */
+function exportImage() {
+  closeExportMenu();
+  showToast('Generating image snapshot…');
+  const target = document.getElementById('mainContent');
+  html2canvas(target, {
+    backgroundColor: '#E8F0FA',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const url = canvas.toDataURL('image/png');
+    const a   = document.createElement('a');
+    a.href    = url;
+    a.download = `bunnys-dashboard-${new Date().toISOString().slice(0, 10)}.png`;
+    a.click();
+    showToast('Image exported ✓');
+  }).catch(() => showToast('Image export failed', true));
+}
+
+/* ─── Load Data ──────────────────────────────────────────── */
+fetch('data.json')
+  .then(r => r.json())
+  .then(data => {
+    allData = data;
+    initFilters();
+    render();
+  })
+  .catch(() => {
+    // Inject demo data so dashboard is functional without a server
+    allData = generateDemoData();
+    initFilters();
+    render();
+    document.getElementById('dateRangeBadge').textContent = 'Demo Mode';
+  });
+
+/* ─── Demo Data Generator ────────────────────────────────── */
+function generateDemoData() {
+  const obs      = ['OB-101', 'OB-102', 'OB-103', 'OB-104', 'OB-105', 'OB-106'];
+  const channels = ['LMT', 'WS', 'Stands'];
+  const cats     = ['Beverages', 'Snacks', 'Dairy'];
+  const skus     = ['SKU-A1', 'SKU-A2', 'SKU-B1', 'SKU-B2', 'SKU-C1'];
+  const outlets  = Array.from({ length: 30 }, (_, i) => `OUT-${String(i + 1).padStart(3, '0')}`);
+  const rows = [];
+  for (let day = 1; day <= 10; day++) {
+    const date = `2025-01-${String(day).padStart(2, '0')}`;
+    obs.forEach(ob => {
+      const nInvoices = 3 + Math.floor(Math.random() * 6);
+      for (let i = 0; i < nInvoices; i++) {
+        rows.push({
+          'Date': date,
+          'Order Booker Code': ob,
+          'Channel': channels[Math.floor(Math.random() * channels.length)],
+          'Category': cats[Math.floor(Math.random() * cats.length)],
+          'Outlet Code': outlets[Math.floor(Math.random() * outlets.length)],
+          'Invoice Number': `INV-${date}-${ob}-${i}`,
+          'SKU Code': skus[Math.floor(Math.random() * skus.length)],
+          'Sales CTN': +(10 + Math.random() * 90).toFixed(2)
+        });
+      }
+    });
+  }
+  return rows;
+}
 </script>
 </body>
 </html>
