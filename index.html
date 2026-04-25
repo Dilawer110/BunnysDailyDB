@@ -76,6 +76,7 @@
             align-items: center;
             gap: 12px;
             padding: 0 16px;
+            overflow-x: auto;
         }
 
         .filter-pill {
@@ -84,13 +85,14 @@
             gap: 6px;
             color: rgba(255,255,255,0.9);
             font-size: 11px;
+            white-space: nowrap;
         }
 
         .filter-pill select {
-            background: rgba(255,255,255,0.1);
+            background: white; /* Explicit background for visibility */
             border: 1px solid rgba(255,255,255,0.2);
             border-radius: 2px;
-            color: white;
+            color: #252423; /* Dark text for light background */
             font-size: 11px;
             outline: none;
             cursor: pointer;
@@ -99,8 +101,8 @@
         }
 
         .filter-pill select option {
-            background: #252423;
-            color: white;
+            background: white;
+            color: #252423;
         }
 
         .header-actions { display: flex; align-items: center; gap: 8px; }
@@ -232,7 +234,7 @@
         
         .total-row { background: #f3f2f1; font-weight: 700; color: var(--text-main); }
         .total-row td { border-top: 2px solid #bbb; }
-        .total-row .manager-badge { 
+        .total-row .summary-badge { 
             background: var(--accent); 
             color: white; 
             padding: 2px 6px; 
@@ -420,7 +422,7 @@
         renderHeatmap(filtered);
         
         const statusEl = document.getElementById('statusBadge');
-        if (statusEl) statusEl.innerText = `${filtered.length} active records`;
+        if (statusEl) statusEl.innerText = `${filtered.length} records active`;
     }
 
     function calculateKPIs(data) {
@@ -433,7 +435,6 @@
         const totalBills = [...new Set(data.map(d => d['Invoice Number']))].length;
         document.getElementById('kpi-bills').innerText = Math.round(totalBills / dayCount);
 
-        // Header name corrected to "Order Booker Name"
         const obsPerDay = dates.map(dt => [...new Set(data.filter(d => d.Date === dt).map(d => d['Order Booker Name']))].length);
         document.getElementById('kpi-obs').innerText = Math.round(obsPerDay.reduce((a,b)=>a+b,0)/dayCount || 0);
 
@@ -446,7 +447,6 @@
         const thead = document.getElementById('theadRow');
         const tbody = document.getElementById('tbodyData');
         const dates = [...new Set(data.map(d => d.Date))].sort();
-        // Header name corrected to "Order Booker Name"
         const obs = [...new Set(data.map(d => d['Order Booker Name']))].sort();
 
         if(!dates.length) { tbody.innerHTML = '<tr><td colspan="30" style="padding:40px">No records found matching these filters</td></tr>'; return; }
@@ -496,15 +496,16 @@
             </tr>
         `).join('');
 
-        // Dynamic Manager Row Logic as requested
-        let managerName = "Hunain Ali"; // Default Grand Total if all filters selected or none
+        // Dynamic Manager/TSE Row Logic
+        let summaryName = "Hunain Ali"; 
+        let summaryLabel = "Manager";
         
-        // Priority logic: HASONEVALUE(Distributor Name)
         if (state.distributor !== 'All' && data.length > 0) {
-            managerName = data[0]["Manager Name"] || "Unknown Manager";
+            summaryName = data[0]["TSE Name"] || data[0]["Manager Name"] || "TSE Name Missing";
+            summaryLabel = "TSE";
         }
 
-        let totalRowHtml = `<tr class="total-row"><td class="row-label">${managerName} <span class="manager-badge">Manager</span></td>`;
+        let totalRowHtml = `<tr class="total-row"><td class="row-label">${summaryName} <span class="summary-badge">${summaryLabel}</span></td>`;
         let grandTotalVal = 0;
         
         dates.forEach(d => {
@@ -549,7 +550,7 @@
             logging: false
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'sales_dashboard_snapshot.png';
+            link.download = `sales_dashboard_${new Date().toISOString().slice(0,10)}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         }).catch(err => {
@@ -559,16 +560,17 @@
 
     function generateDemoData() {
         const names=['Atif Mehmood', 'Zeeshan Khan', 'M. Ali'], cats=['Nimko','Chips','Nuts'], dists=['Rauf Sons', 'Hammad Traders'];
-        const managers={'Rauf Sons': 'Ahmed Raza', 'Hammad Traders': 'Sara Khan'};
+        const tseNames={'Rauf Sons': 'TSE-Ahmad', 'Hammad Traders': 'TSE-Fatima'};
         const data=[];
         for(let i=0; i<80; i++) {
             const dName = dists[i%2];
             data.push({
                 "Distributor Name": dName, 
-                "Manager Name": managers[dName],
+                "TSE Name": tseNames[dName],
+                "Manager Name": "Hunain Ali",
                 "Order Booker Name": names[i%3], 
                 "Category": cats[i%3], 
-                "Channel": i%4===0?"Retail":"WS",
+                "Channel": i%4===0?"Retail":"Wholesale",
                 "Invoice Number": "D002-INV-"+(1000 + Math.floor(i/4)), 
                 "Outlet Code": "N-"+(5000+ (i%10)), 
                 "SKU Code": "SKU-"+(i%20),
