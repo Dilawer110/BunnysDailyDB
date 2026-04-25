@@ -932,48 +932,25 @@ function renderTSE() {
     `${data.length.toLocaleString()} records · ${obs.length} OBs · ${dates.length} days`;
 
   /* Build per-OB metrics */
-/* Resolve TSE name for each distributor */
-  const distList = uniq(data.map(d => d['Distributor Name']).filter(Boolean));
-  const tseList  = uniq(distList.map(d => TSE_MAP[d]).filter(Boolean)).sort();
-
-  /* Aggregate per TSE across all their OBs and dates */
-  const tseRows = tseList.map(tse => {
-    const tseDists = Object.keys(TSE_MAP).filter(k => TSE_MAP[k] === tse);
-    const tseData  = data.filter(r => tseDists.includes(r['Distributor Name']));
-    const tseDates = uniq(tseData.map(r => r['Date']));
-    const tseObs   = uniq(tseData.map(r => r['Order Booker Name']).filter(Boolean));
-    const byDate   = gBy(tseData, 'Date');
-
-    /* Per day: total CTN ÷ active OBs that day = avg per OB */
-    const dailyAvgSales = tseDates.map(d => {
-      const dayRows  = byDate[d];
-      const dayObs   = uniq(dayRows.map(r => r['Order Booker Name']).filter(Boolean)).length;
-      const dayCtns  = sum(dayRows.map(r => r['Sales CTN'] || 0));
-      return dayObs ? dayCtns / dayObs : 0;
-    });
-
-    /* Per day: total unique bills ÷ active OBs that day */
-    const dailyAvgBills = tseDates.map(d => {
-      const dayRows  = byDate[d];
-      const dayObs   = uniq(dayRows.map(r => r['Order Booker Name']).filter(Boolean)).length;
-      const dayBills = uniq(dayRows.map(r => r['Invoice Number'])).length;
-      return dayObs ? dayBills / dayObs : 0;
-    });
-
+const obRows = obs.map(ob => {
+    const obData  = data.filter(r => r['Order Booker Name'] === ob);
+    const obDates = uniq(obData.map(r => r['Date']));
+    const tse     = (fDist !== 'All' && TSE_MAP[fDist]) ? TSE_MAP[fDist]
+                  : (TSE_MAP[Object.keys(TSE_MAP).find(k => allData.find(r => r['Distributor Name']===k && r['Order Booker Name']===ob))] || '—');
+    const byDate  = gBy(obData, 'Date');
+    const dailySales = obDates.map(d => sum(byDate[d].map(r => r['Sales CTN']||0)));
+    const dailyBills = obDates.map(d => uniq(byDate[d].map(r => r['Invoice Number'])).length);
     return {
+      ob,
       tse,
-      obCount:  tseObs.length,
-      avgSales: avg(dailyAvgSales),
-      avgBills: avg(dailyAvgBills),
-      days:     tseDates.length
+      avgSales: avg(dailySales),
+      avgBills: avg(dailyBills),
+      days:     obDates.length
     };
   }).sort((a, b) => b.avgSales - a.avgSales);
 
-  document.getElementById('tsePageSub').textContent =
-    `${data.length.toLocaleString()} records · ${tseList.length} TSEs · ${dates.length} days`;
-
-  renderTSEChart('tseSalesCon', tseRows, 'avgSales', 'Avg Daily Sales CTN per OB', '#2A5298');
-  renderTSEChart('tseBillsCon', tseRows, 'avgBills', 'Avg Daily Bills per OB',     '#117A8B');
+  renderTSEChart('tseSalesCon', obRows, 'avgSales', 'Avg Daily Sales (CTN)', '#2A5298');
+  renderTSEChart('tseBillsCon', obRows, 'avgBills', 'Avg Daily Bills',       '#117A8B');
 
 function renderTSEChart(conId, rows, key, label, color) {
   if (!rows.length) {
@@ -999,8 +976,8 @@ ${rows.map((r, i) => {
           const rank  = i === 0 ? `<span style="background:rgba(42,82,152,.1);color:var(--pbi-blue);font-size:8px;font-weight:800;padding:1px 5px;border-radius:99px;margin-left:5px">TOP</span>` : '';
           const shade = i % 2 === 0 ? 'background:rgba(242,245,249,.6)' : '';
           return `<tr style="${shade}">
-            <td style="padding:5px 8px 5px 0;font-size:11px;font-weight:600;color:var(--txt-b)">${r.tse}${rank}</td>
-            <td style="padding:5px 8px;font-size:10px;color:var(--txt-m)">${r.obCount} OB${r.obCount !== 1 ? 's' : ''}</td>
+            <td style="padding:5px 8px 5px 0;font-size:11px;font-weight:600;color:var(--txt-b)">${r.ob}${rank}</td>
+            <td style="padding:5px 8px;font-size:10px;color:var(--txt-m)">${r.tse}</td>
             <td style="padding:5px 0;font-size:11px;font-weight:700;color:var(--txt-h);text-align:right;font-variant-numeric:tabular-nums">${r[key].toFixed(2)}</td>
             <td style="padding:5px 0 5px 10px">
               <div style="background:var(--pbi-bg);border-radius:2px;height:10px;overflow:hidden">
