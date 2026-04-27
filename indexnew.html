@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Bunny's Sales Intelligence — Daily Target Achievement</title>
 <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root {
@@ -252,6 +253,10 @@ body{font-family:var(--font);background:var(--pbi-bg);color:var(--txt-b);font-si
   </div>
 
   <div class="tb-right">
+<button class="tb-btn" onclick="exportImg()">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="2" width="10" height="8" rx="1.5"/><circle cx="3.5" cy="4.5" r="1"/><path d="M1 8l3-2.5 2.5 2.5 1.5-1.5L11 10" stroke-linecap="round"/></svg>
+      Image
+    </button>
     <button class="tb-btn acc" onclick="exportCSV()">
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6">
         <path d="M6 1v7M3.5 5.5L6 8l2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -643,6 +648,28 @@ function exportCSV() {
   });
   a.click(); URL.revokeObjectURL(a.href);
   toast('CSV exported ✓');
+}
+
+/* ════ EXPORT IMAGE ═════════════════════════════════════ */
+function exportImg() {
+  const distLabel = fDist === 'All' ? 'All Distributors' : fDist;
+  const banner = document.createElement('div');
+  banner.style.cssText = 'background:#1C3A5E;color:#fff;padding:8px 14px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:space-between;';
+  banner.innerHTML = `<span>Bunny's — Daily Target Achievement</span><span style="opacity:.7;font-weight:400">Distributor: ${distLabel} &nbsp;·&nbsp; ${new Date().toLocaleDateString('en-GB')}</span>`;
+  const main = document.querySelector('.main');
+  main.insertBefore(banner, main.firstChild);
+  toast('Generating snapshot…');
+  html2canvas(main, { backgroundColor:'#F2F5F9', scale:2, useCORS:true, logging:false })
+    .then(c => {
+      banner.remove();
+      const a = Object.assign(document.createElement('a'), {
+        href: c.toDataURL('image/png'),
+        download: `bunnys-mtd-${distLabel.replace(/\s+/g,'-').toLowerCase()}-${new Date().toISOString().slice(0,10)}.png`
+      });
+      a.click();
+      toast('Image exported ✓');
+    })
+    .catch(() => { banner.remove(); toast('Export failed', true); });
 }
 
 /* ════ BOOT ═════════════════════════════════════════════ */
