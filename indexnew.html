@@ -387,6 +387,7 @@ function initFilter() {
 }
 function applyFilter() {
   fDist = document.getElementById('fDist').value;
+  sessionStorage.setItem('bunnys_fDist', fDist);
   updateMgr();
   render();
 }
@@ -658,7 +659,12 @@ fetch('kpidata.json')
       });
       return clean;
     });
-    initFilter();
+initFilter();
+    const saved = sessionStorage.getItem('bunnys_fDist');
+    if (saved && saved !== 'All') {
+      fDist = saved;
+      document.getElementById('fDist').value = saved;
+    }
     updateMgr();
     render();
   })
