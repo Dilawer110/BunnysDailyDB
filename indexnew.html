@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bunny's Sales Intelligence — Daily Target Achievement</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root {
+  --pbi-navy:    #1C3A5E;
+  --pbi-blue:    #2A5298;
+  --pbi-blue-m:  #3B6AC4;
+  --pbi-teal:    #117A8B;
+  --pbi-bg:      #F2F5F9;
+  --pbi-white:   #FFFFFF;
+  --pbi-border:  #D0D9E6;
+  --pbi-bdk:     #A8B8CF;
+  --txt-h:#0F2340;--txt-b:#1E3A5A;--txt-s:#3D5A78;--txt-m:#6B84A0;--txt-l:#96AABF;
+  --green:#107C41;--green-bg:#E8F5EC;
+  --red:#C0392B;--red-bg:#FDECEB;
+  --amber:#9A6B00;--amber-bg:#FEF8E1;
+  --sb-w:196px;--tb-h:44px;
+  --r:4px;--r-sm:5px;--r-lg:7px;
+  --sh-xs:0 1px 3px rgba(28,58,94,.07);
+  --sh-sm:0 2px 8px rgba(28,58,94,.10);
+  --sh-md:0 4px 16px rgba(28,58,94,.13);
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'Consolas','Cascadia Code',monospace;
+  --tr:.14s ease;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--pbi-bg);color:var(--txt-b);font-size:12px;line-height:1.4}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--pbi-bdk);border-radius:99px}
+
+/* ── TOP BAR ─────────────────────────────────────────── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--tb-h);
+  background:var(--pbi-navy);display:flex;align-items:center;
+  z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.28);
+}
+.tb-brand{
+  width:var(--sb-w);display:flex;align-items:center;gap:7px;
+  padding:0 11px;border-right:1px solid rgba(255,255,255,.1);
+  height:100%;flex-shrink:0;
+}
+.tb-logo{height:26px;width:auto;object-fit:contain;filter:brightness(0) invert(1)}
+.tb-logo-fb{width:26px;height:26px;background:rgba(255,255,255,.15);border-radius:4px;display:none;align-items:center;justify-content:center;}
+.tb-logo-fb svg{width:14px;height:14px;fill:white}
+.brand-n{font-size:12px;font-weight:700;color:#fff;letter-spacing:.01em}
+.brand-s{font-size:9px;color:rgba(255,255,255,.4);font-weight:400}
+.tb-pagetitle{padding:0 12px;height:100%;display:flex;flex-direction:column;justify-content:center;border-right:1px solid rgba(255,255,255,.1);}
+.tb-pt-main{font-size:12px;font-weight:700;color:rgba(255,255,255,.9)}
+.tb-pt-sub{font-size:9.5px;color:rgba(255,255,255,.45)}
+.tb-filters{flex:1;display:flex;align-items:center;gap:9px;padding:0 12px;}
+.fil-unit{display:flex;align-items:center;gap:5px}
+.fil-unit label{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.pbi-sel{
+  height:25px;padding:0 20px 0 7px;border-radius:3px;
+  border:1px solid rgba(255,255,255,.18);background:#fff;color:var(--txt-h);
+  font-family:var(--font);font-size:11px;font-weight:700;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%231C3A5E' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 5px center;
+  cursor:pointer;min-width:160px;box-shadow:var(--sh-xs);
+}
+.pbi-sel:focus{outline:2px solid rgba(255,255,255,.35);outline-offset:0}
+.tb-right{display:flex;align-items:center;gap:5px;padding:0 10px;border-left:1px solid rgba(255,255,255,.1);}
+.tb-btn{
+  height:26px;padding:0 9px;display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  border-radius:3px;color:rgba(255,255,255,.78);
+  font-family:var(--font);font-size:11px;font-weight:600;
+  cursor:pointer;transition:var(--tr);white-space:nowrap;
+}
+.tb-btn:hover{background:rgba(255,255,255,.18);color:#fff}
+.tb-btn svg{width:11px;height:11px;flex-shrink:0}
+.tb-btn.acc{background:var(--pbi-blue-m);border-color:transparent;color:#fff}
+.tb-btn.acc:hover{background:#4A7AD4}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar{
+  position:fixed;top:var(--tb-h);left:0;bottom:0;
+  width:var(--sb-w);background:var(--pbi-white);
+  border-right:1px solid var(--pbi-border);
+  overflow-y:auto;z-index:200;display:flex;flex-direction:column;
+}
+.sb-grp{border-bottom:1px solid var(--pbi-border)}
+.sb-grp-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 10px;cursor:pointer;background:#F5F8FB;
+  font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--txt-s);user-select:none;transition:background var(--tr);
+}
+.sb-grp-hdr:hover{background:#EEF3F9}
+.sb-chev{width:11px;height:11px;transition:transform .18s;opacity:.45;flex-shrink:0}
+.sb-grp.open .sb-chev{transform:rotate(90deg)}
+.sb-items{display:none;flex-direction:column;padding:3px 5px}
+.sb-grp.open .sb-items{display:flex}
+.nav-item{
+  display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:3px;
+  cursor:pointer;color:var(--txt-s);font-size:11.5px;font-weight:500;
+  transition:var(--tr);margin-bottom:1px;
+}
+.nav-item:hover{background:var(--pbi-bg);color:var(--pbi-blue)}
+.nav-item.active{
+  background:linear-gradient(90deg,#EEF3FC,#F6F9FD);
+  color:var(--pbi-blue);font-weight:700;
+  border-left:3px solid var(--pbi-blue-m);padding-left:4px;
+}
+.ni-ico{width:21px;height:21px;border-radius:3px;display:flex;align-items:center;justify-content:center;background:var(--pbi-bg);flex-shrink:0;}
+.nav-item.active .ni-ico{background:rgba(59,106,196,.11)}
+.ni-ico svg{width:11px;height:11px}
+.ni-lbl{flex:1;line-height:1.2;font-size:11px}
+.ni-s{font-size:9px;font-weight:400;color:var(--txt-l);margin-top:1px}
+.ni-tag{font-size:8px;font-weight:800;padding:1px 5px;border-radius:99px;background:rgba(42,82,152,.11);color:var(--pbi-blue);letter-spacing:.04em}
+.ni-ext{font-size:8px;font-weight:600;color:var(--txt-l);padding:1px 5px;border-radius:99px;border:1px solid var(--pbi-border);background:var(--pbi-bg)}
+.sb-foot{margin-top:auto;padding:9px 10px;border-top:1px solid var(--pbi-border)}
+.sb-mgr{
+  display:flex;align-items:center;gap:7px;
+  background:linear-gradient(90deg,rgba(42,82,152,.07),rgba(59,106,196,.03));
+  border:1px solid rgba(42,82,152,.13);border-radius:4px;padding:7px 8px;
+}
+.sb-av{width:24px;height:24px;border-radius:50%;background:var(--pbi-blue);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-mn{font-size:11px;font-weight:700;color:var(--pbi-blue);line-height:1.2}
+.sb-mr{font-size:9px;color:var(--txt-m)}
+
+/* ── MAIN CANVAS ─────────────────────────────────────── */
+.main{margin-left:var(--sb-w);margin-top:var(--tb-h);height:calc(100vh - var(--tb-h));overflow-y:auto;background:var(--pbi-bg);}
+.report-page{padding:10px 12px 20px;animation:fdIn .2s ease}
+@keyframes fdIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.page-strip{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:4px}
+.page-h{font-size:13.5px;font-weight:700;color:var(--txt-h);letter-spacing:-.01em}
+.page-sub{font-size:10px;color:var(--txt-m);margin-top:1px}
+
+/* ── KPI CARDS ───────────────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:9px}
+.kpi-card{
+  background:var(--pbi-white);border:1px solid var(--pbi-border);
+  border-radius:var(--r);padding:10px 12px 9px;box-shadow:var(--sh-xs);
+  transition:box-shadow var(--tr);position:relative;overflow:hidden;
+}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-b,linear-gradient(90deg,#1C3A5E,#2A5298));}
+.kpi-card:hover{box-shadow:var(--sh-sm)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
+.kpi-ico{width:28px;height:28px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;background:var(--kpi-ib,rgba(42,82,152,.09));flex-shrink:0;}
+.kpi-ico svg{width:13px;height:13px}
+.kpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt-m);margin-bottom:2px}
+.kpi-val{font-size:20px;font-weight:700;color:var(--txt-h);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.kpi-unit{font-size:10px;font-weight:400;color:var(--txt-m);margin-left:2px;vertical-align:middle}
+.kpi-sub{font-size:9px;color:var(--txt-l);margin-top:3px}
+.kpi-note{font-size:9px;color:var(--txt-l);margin-top:5px;padding-top:4px;border-top:1px solid var(--pbi-border)}
+
+/* ── VIS CARD ────────────────────────────────────────── */
+.vis-card{background:var(--pbi-white);border:1px solid var(--pbi-border);border-radius:var(--r);box-shadow:var(--sh-xs);margin-bottom:9px;overflow:hidden;}
+.vis-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 11px;border-bottom:1px solid var(--pbi-border);
+  background:linear-gradient(90deg,rgba(28,58,94,.025),transparent);
+  flex-wrap:wrap;gap:6px;
+}
+.vis-title{font-size:11px;font-weight:700;color:var(--txt-h)}
+.vis-sub{font-size:9.5px;color:var(--txt-l);margin-top:1px}
+
+/* ── MTD TABLE ───────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;padding:0}
+.mtd-table{width:100%;border-collapse:collapse;font-size:11px;}
+.mtd-table thead tr{background:linear-gradient(90deg,rgba(28,58,94,.04),rgba(28,58,94,.02));}
+.mtd-table thead th{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--txt-m);padding:7px 10px;text-align:right;white-space:nowrap;
+  border-bottom:2px solid var(--pbi-border);position:sticky;top:0;background:#fff;z-index:2;
+}
+.mtd-table thead th:first-child{text-align:left;min-width:160px;padding-left:12px;}
+.mtd-table thead th:nth-child(2){text-align:left;min-width:80px;}
+
+/* OB rows */
+.mtd-table tbody tr.ob-row{transition:background var(--tr);}
+.mtd-table tbody tr.ob-row:hover{background:rgba(42,82,152,.04);}
+.mtd-table tbody td{padding:5px 10px;text-align:right;border-bottom:1px solid rgba(208,217,230,.5);vertical-align:middle;}
+.mtd-table tbody td:first-child{text-align:left;padding-left:12px;font-weight:600;color:var(--txt-b);}
+.mtd-table tbody td:nth-child(2){text-align:left;color:var(--txt-m);font-size:10px;}
+
+/* TSE subtotal rows */
+.mtd-table tbody tr.tse-row td{
+  background:linear-gradient(90deg,rgba(28,58,94,.06),rgba(28,58,94,.03));
+  font-weight:700;color:var(--pbi-navy);
+  border-top:1px solid rgba(28,58,94,.15);
+  border-bottom:2px solid rgba(28,58,94,.15);
+  padding:6px 10px;font-size:10.5px;
+}
+.mtd-table tbody tr.tse-row td:first-child{padding-left:12px;color:var(--pbi-blue);}
+
+/* Grand total */
+.mtd-table tfoot tr td{
+  background:rgba(28,58,94,.08);font-weight:700;color:var(--pbi-navy);
+  border-top:2px solid rgba(28,58,94,.2);padding:7px 10px;font-size:11px;
+}
+.mtd-table tfoot tr td:first-child{padding-left:12px;}
+
+/* Achievement badge */
+.ach-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;
+  min-width:52px;
+}
+.ach-green{background:var(--green-bg);color:var(--green)}
+.ach-amber{background:var(--amber-bg);color:var(--amber)}
+.ach-red{background:var(--red-bg);color:var(--red)}
+
+/* Progress mini-bar */
+.prog-wrap{display:flex;align-items:center;gap:5px;justify-content:flex-end;}
+.prog-bar{width:60px;height:6px;background:var(--pbi-bg);border-radius:99px;overflow:hidden;flex-shrink:0;}
+.prog-fill{height:100%;border-radius:99px;transition:width .4s ease;}
+
+/* ── UTILITIES ───────────────────────────────────────── */
+.state-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;color:var(--txt-l);font-size:11px;gap:7px}
+.spinner{width:22px;height:22px;border:2px solid var(--pbi-bg);border-top-color:var(--pbi-blue-m);border-radius:50%;animation:spin .65s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--pbi-navy);color:#fff;padding:9px 14px;border-radius:var(--r-sm);font-size:11px;font-weight:500;display:flex;align-items:center;gap:7px;box-shadow:var(--sh-md);transform:translateY(60px);opacity:0;transition:transform .25s,opacity .25s;z-index:9999;}
+.toast.show{transform:translateY(0);opacity:1}
+@keyframes au{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.a1{animation:au .2s .04s ease both}.a2{animation:au .2s .08s ease both}.a3{animation:au .2s .12s ease both}.a4{animation:au .2s .16s ease both}.a5{animation:au .2s .20s ease both}
+</style>
+</head>
+<body>
+
+<!-- ══════════ TOP BAR ══════════════════════════════════ -->
+<header class="topbar">
+  <div class="tb-brand">
+    <img class="tb-logo" src="https://i.ibb.co/5XpmYYZz/image.png" alt="Bunny's"
+         onerror="this.style.display='none';document.getElementById('lgFb').style.display='flex'"/>
+    <div class="tb-logo-fb" id="lgFb">
+      <svg viewBox="0 0 20 20"><circle cx="10" cy="9" r="4" fill="white"/><ellipse cx="6.5" cy="5.5" rx="1.4" ry="3" fill="white" opacity=".7" transform="rotate(-15 6.5 5.5)"/><ellipse cx="13.5" cy="5.5" rx="1.4" ry="3" fill="white" opacity=".7" transform="rotate(15 13.5 5.5)"/></svg>
+    </div>
+    <div><div class="brand-n">Bunny's</div><div class="brand-s">Sales Intelligence</div></div>
+  </div>
+
+  <div class="tb-pagetitle">
+    <div class="tb-pt-main">Daily Target Achievement</div>
+    <div class="tb-pt-sub">Month-to-Date OB Performance</div>
+  </div>
+
+  <div class="tb-filters">
+    <div class="fil-unit">
+      <label>Distributor</label>
+      <select class="pbi-sel" id="fDist" onchange="applyFilter()">
+        <option value="All">All Distributors</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tb-right">
+    <button class="tb-btn acc" onclick="exportCSV()">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M6 1v7M3.5 5.5L6 8l2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M1 9v1.5A.5.5 0 001.5 11h9a.5.5 0 00.5-.5V9" stroke-linecap="round"/>
+      </svg>Export CSV
+    </button>
+    <button class="tb-btn" onclick="resetFilter()">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 6A4 4 0 116 2" stroke-linecap="round"/><path d="M2 1v5h5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>Reset
+    </button>
+    <a href="index.html" class="tb-btn">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M7 2L3 6l4 4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>Back
+    </a>
+  </div>
+</header>
+
+<!-- ══════════ SIDEBAR ═══════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sb-grp open">
+    <div class="sb-grp-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <span>Analytics</span>
+      <svg class="sb-chev" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 2l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="sb-items">
+      <a class="nav-item" href="index.html" style="text-decoration:none">
+        <div class="ni-ico"><svg viewBox="0 0 12 12" fill="none" stroke="var(--txt-m)" stroke-width="1.5"><rect x="1" y="1" width="4.5" height="4.5" rx="1"/><rect x="6.5" y="1" width="4.5" height="4.5" rx="1"/><rect x="1" y="6.5" width="4.5" height="4.5" rx="1"/><rect x="6.5" y="6.5" width="4.5" height="4.5" rx="1"/></svg></div>
+        <div class="ni-lbl">Performance Overview<div class="ni-s">Day Wise Trend</div></div>
+        <span class="ni-ext">↗</span>
+      </a>
+      <div class="nav-item active">
+        <div class="ni-ico"><svg viewBox="0 0 12 12" fill="none" stroke="var(--pbi-blue)" stroke-width="1.5"><path d="M1 9l3-5 2.5 3L9 3l2 3" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 11h10" stroke-linecap="round" stroke-dasharray="1.5 1.5"/></svg></div>
+        <div class="ni-lbl">Daily Tgt Ach<div class="ni-s">MTD OB Performance</div></div>
+        <span class="ni-tag">LIVE</span>
+      </div>
+    </div>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-mgr">
+      <div class="sb-av" id="mgrAv">HA</div>
+      <div>
+        <div class="sb-mn" id="mgrName">Hunain Ali</div>
+        <div class="sb-mr" id="mgrRole">Territory Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN CANVAS ═══════════════════════════════ -->
+<main class="main">
+  <div class="report-page" id="mainPage">
+    <div class="page-strip a1">
+      <div>
+        <div class="page-h">Daily Target Achievement — MTD Performance</div>
+        <div class="page-sub" id="pageSub">Loading data…</div>
+      </div>
+    </div>
+
+    <!-- KPI Summary Row -->
+    <div class="kpi-row" id="kpiRow">
+      <div class="kpi-card a1"><div class="state-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Main Table -->
+    <div class="vis-card a3">
+      <div class="vis-head">
+        <div>
+          <div class="vis-title">OB Wise Month-to-Date Performance &nbsp;<span style="color:var(--txt-l);font-weight:400;font-size:10px">Grouped by TSE</span></div>
+          <div class="vis-sub" id="tblSub">Loading…</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--txt-l)">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>≥80%
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;margin-left:4px"></span>50–79%
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin-left:4px"></span>&lt;50%
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div id="tblCon"><div class="state-box"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"><span id="toastMsg">Done</span></div>
+
+<script>
+/* ════ TSE MAP ══════════════════════════════════════════ */
+const TSE_MAP = {
+  "A&H Enterprises":         "Zahid Khan",
+  "Green Way Marketing":     "Rana Hassan",
+  "Liaqat Ali Traders":      "Muhammad Sheeraz",
+  "Rauf Sons":               "Waseem Ahmad",
+  "SYNERGY TRADERS PVT LTD": "Tariq Ijaz"
+};
+
+/* ════ STATE ════════════════════════════════════════════ */
+let allData = [], fDist = 'All';
+
+/* ════ HELPERS ══════════════════════════════════════════ */
+const uniq = a => [...new Set(a)];
+const sum  = a => a.reduce((x, y) => x + (Number(y) || 0), 0);
+const pct  = (a, b) => b ? Math.round((a / b) * 100) : 0;
+const num  = v => { const n = Number(String(v).replace(/[^0-9.-]/g,'')); return isNaN(n) ? 0 : n; };
+const fmtN = (v, d=0) => Number(v).toLocaleString('en', {minimumFractionDigits:d, maximumFractionDigits:d});
+
+function achClass(p) {
+  if (p >= 80) return 'ach-green';
+  if (p >= 50) return 'ach-amber';
+  return 'ach-red';
+}
+function achColor(p) {
+  if (p >= 80) return 'var(--green)';
+  if (p >= 50) return 'var(--amber)';
+  return 'var(--red)';
+}
+function toast(msg, err=false) {
+  const el = document.getElementById('toast');
+  el.style.background = err ? '#8B1A1A' : 'var(--pbi-navy)';
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ════ FILTER ═══════════════════════════════════════════ */
+function initFilter() {
+  const dists = uniq(allData.map(d => d['Distributor Name']).filter(Boolean)).sort();
+  const sel = document.getElementById('fDist');
+  sel.innerHTML = '<option value="All">All Distributors</option>' +
+    dists.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+function applyFilter() {
+  fDist = document.getElementById('fDist').value;
+  updateMgr();
+  render();
+}
+function resetFilter() {
+  fDist = 'All';
+  document.getElementById('fDist').value = 'All';
+  updateMgr();
+  render();
+  toast('Filter reset');
+}
+function getData() {
+  return fDist === 'All' ? allData : allData.filter(d => d['Distributor Name'] === fDist);
+}
+
+/* ════ MANAGER TAG ══════════════════════════════════════ */
+function updateMgr() {
+  const nm = document.getElementById('mgrName');
+  const rl = document.getElementById('mgrRole');
+  const av = document.getElementById('mgrAv');
+  if (fDist !== 'All' && TSE_MAP[fDist]) {
+    const tse = TSE_MAP[fDist];
+    nm.textContent = tse;
+    rl.textContent = `TSE — ${fDist}`;
+    av.textContent = tse.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    av.style.background = 'var(--pbi-teal)';
+  } else {
+    nm.textContent = 'Hunain Ali';
+    rl.textContent = 'Territory Manager';
+    av.textContent = 'HA';
+    av.style.background = 'var(--pbi-blue)';
+  }
+}
+
+/* ════ RENDER ═══════════════════════════════════════════ */
+function render() {
+  const data = getData();
+  document.getElementById('pageSub').textContent =
+    `${data.length} order bookers · ${uniq(data.map(d => d['Distributor Name'])).length} distributors`;
+  renderKPIs(data);
+  renderTable(data);
+}
+
+/* ════ KPI CARDS ════════════════════════════════════════ */
+function renderKPIs(data) {
+  const totalSalesCtn  = sum(data.map(d => num(d['Sales in Ctn'])));
+  const totalTgtCtn    = sum(data.map(d => num(d['OB Tgt Ctns'])));
+  const totalBills     = sum(data.map(d => num(d['Bill Prod.'])));
+  const totalBillsTgt  = sum(data.map(d => num(d['Bills Target'])));
+  const totalOutlets   = sum(data.map(d => num(d['Outlets'])));
+  const avgSku         = data.filter(d => num(d['SKU per Bill']) > 0);
+  const avgSkuVal      = avgSku.length ? (sum(avgSku.map(d => num(d['SKU per Bill']))) / avgSku.length) : 0;
+  const achPct         = pct(totalSalesCtn, totalTgtCtn);
+
+  const kpis = [
+    {
+      label:'Sales in CTN', sub:'MTD Actual',
+      val: fmtN(totalSalesCtn), unit:'CTN',
+      note:`Target: ${fmtN(totalTgtCtn)} CTN`,
+      bar:'linear-gradient(90deg,#1C3A5E,#2A5298)', ib:'rgba(28,58,94,.08)',
+      ic:`<svg viewBox="0 0 13 13" fill="none" stroke="#1C3A5E" stroke-width="1.5"><rect x="1" y="7" width="3" height="5" rx=".8"/><rect x="5" y="4" width="3" height="8" rx=".8"/><rect x="9" y="1" width="3" height="11" rx=".8"/></svg>`
+    },
+    {
+      label:'CTN Achievement', sub:'vs Target',
+      val: achPct, unit:'%',
+      note:`${fmtN(totalTgtCtn - totalSalesCtn)} CTN remaining`,
+      bar: achPct>=80 ? 'linear-gradient(90deg,#107C41,#1DA054)' : achPct>=50 ? 'linear-gradient(90deg,#9A6B00,#C8980A)' : 'linear-gradient(90deg,#C0392B,#E05444)',
+      ib: achPct>=80 ? 'rgba(16,124,65,.08)' : achPct>=50 ? 'rgba(154,107,0,.08)' : 'rgba(192,57,43,.08)',
+      ic:`<svg viewBox="0 0 13 13" fill="none" stroke="${achPct>=80?'#107C41':achPct>=50?'#9A6B00':'#C0392B'}" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="5"/><path d="M4 6.5l2 2 3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    },
+    {
+      label:'Bills Produced', sub:'MTD Actual',
+      val: fmtN(totalBills), unit:'',
+      note:`Target: ${fmtN(totalBillsTgt)} bills`,
+      bar:'linear-gradient(90deg,#2A5298,#3B6AC4)', ib:'rgba(42,82,152,.08)',
+      ic:`<svg viewBox="0 0 13 13" fill="none" stroke="#2A5298" stroke-width="1.5"><rect x="2" y="1" width="9" height="11" rx="1.2"/><path d="M4 4.5h5M4 6.5h5M4 8.5h3" stroke-linecap="round"/></svg>`
+    },
+    {
+      label:'Total Outlets', sub:'Covered',
+      val: fmtN(totalOutlets), unit:'',
+      note:`Across ${uniq(data.map(d=>d['Distributor Name'])).length} distributors`,
+      bar:'linear-gradient(90deg,#117A8B,#28A4B5)', ib:'rgba(17,122,139,.08)',
+      ic:`<svg viewBox="0 0 13 13" fill="none" stroke="#117A8B" stroke-width="1.5"><path d="M6.5 1C4.5 1 3 2.6 3 4.5c0 3 3.5 7 3.5 7S10 7.5 10 4.5C10 2.6 8.5 1 6.5 1z"/><circle cx="6.5" cy="4.5" r="1.2"/></svg>`
+    },
+    {
+      label:'Avg SKU / Bill', sub:'Per OB Avg',
+      val: avgSkuVal.toFixed(1), unit:'',
+      note:`${avgSku.length} active OBs with SKU data`,
+      bar:'linear-gradient(90deg,#9A6B00,#C8980A)', ib:'rgba(154,107,0,.08)',
+      ic:`<svg viewBox="0 0 13 13" fill="none" stroke="#9A6B00" stroke-width="1.5"><path d="M6.5 1L12 4.5v4L6.5 12 1 8.5v-4z" stroke-linejoin="round"/><path d="M6.5 1v11M1 4.5l5.5 3 5.5-3" stroke-linecap="round"/></svg>`
+    }
+  ];
+
+  document.getElementById('kpiRow').innerHTML = kpis.map((k, i) => `
+    <div class="kpi-card a${i+1}" style="--kpi-b:${k.bar};--kpi-ib:${k.ib}">
+      <div class="kpi-top">
+        <div>
+          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-val">${k.val}<span class="kpi-unit">${k.unit}</span></div>
+          <div class="kpi-sub">${k.sub}</div>
+        </div>
+        <div class="kpi-ico">${k.ic}</div>
+      </div>
+      <div class="kpi-note">${k.note}</div>
+    </div>`).join('');
+}
+
+/* ════ MAIN TABLE ═══════════════════════════════════════ */
+function renderTable(data) {
+  if (!data.length) {
+    document.getElementById('tblCon').innerHTML = `<div class="state-box">No data for current filter.</div>`;
+    return;
+  }
+
+  /* Group by distributor (TSE) */
+  const distGroups = {};
+  data.forEach(row => {
+    const dist = row['Distributor Name'] || 'Unknown';
+    if (!distGroups[dist]) distGroups[dist] = [];
+    distGroups[dist].push(row);
+  });
+
+  document.getElementById('tblSub').textContent =
+    `${data.length} OBs · ${Object.keys(distGroups).length} distributors`;
+
+  /* Grand totals accumulators */
+  let gtSalesCtn=0, gtTgtCtn=0, gtBills=0, gtBillsTgt=0, gtOutlets=0, gtBtgCtn=0;
+
+  let html = `<table class="mtd-table">
+    <thead><tr>
+      <th style="text-align:left">OB Name</th>
+      <th style="text-align:left">OB Code</th>
+      <th>Outlets</th>
+      <th>Bills Tgt</th>
+      <th>Bills Prod</th>
+      <th>Bill Ach%</th>
+      <th>SKU/Bill</th>
+      <th>CTN Target</th>
+      <th>Sales CTN</th>
+      <th>CTN Ach%</th>
+      <th>BTG CTN</th>
+    </tr></thead>
+    <tbody>`;
+
+  /* Sort distributors by TSE name */
+  const sortedDists = Object.keys(distGroups).sort((a, b) => {
+    const ta = TSE_MAP[a] || a, tb = TSE_MAP[b] || b;
+    return ta.localeCompare(tb);
+  });
+
+  sortedDists.forEach(dist => {
+    const rows = distGroups[dist];
+    const tse  = TSE_MAP[dist] || dist;
+
+    /* Sub-totals for this TSE group */
+    let stSalesCtn=0, stTgtCtn=0, stBills=0, stBillsTgt=0, stOutlets=0, stBtgCtn=0;
+
+    /* Sort OBs by name */
+    rows.sort((a, b) => (a['OrderBooker Name']||'').localeCompare(b['OrderBooker Name']||''));
+
+    rows.forEach(r => {
+      const obName    = r['OrderBooker Name'] || '—';
+      const obCode    = r['OrderBooker Code'] || '—';
+      const outlets   = num(r['Outlets']);
+      const billsTgt  = num(r['Bills Target']);
+      const billsProd = num(r['Bill Prod.']);
+      const skuBill   = num(r['SKU per Bill']);
+      const ctnTgt    = num(r['OB Tgt Ctns']);
+      const salesCtn  = num(r['Sales in Ctn']);
+      const btgCtn    = num(r['BTG Ctns']);
+      const billAch   = pct(billsProd, billsTgt);
+      const ctnAch    = pct(salesCtn, ctnTgt);
+
+      stSalesCtn += salesCtn; stTgtCtn += ctnTgt;
+      stBills    += billsProd; stBillsTgt += billsTgt;
+      stOutlets  += outlets;  stBtgCtn   += btgCtn;
+
+      html += `<tr class="ob-row">
+        <td>${obName}</td>
+        <td style="font-family:var(--mono);font-size:9.5px;color:var(--txt-m)">${obCode}</td>
+        <td>${fmtN(outlets)}</td>
+        <td>${billsTgt ? fmtN(billsTgt) : '—'}</td>
+        <td>${fmtN(billsProd)}</td>
+        <td>
+          ${billsTgt ? `<div class="prog-wrap">
+            <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(billAch,100)}%;background:${achColor(billAch)}"></div></div>
+            <span class="ach-badge ${achClass(billAch)}">${billAch}%</span>
+          </div>` : '<span style="color:var(--txt-l);font-size:10px">—</span>'}
+        </td>
+        <td>${skuBill ? skuBill.toFixed(1) : '—'}</td>
+        <td>${fmtN(ctnTgt)}</td>
+        <td style="font-weight:600">${fmtN(salesCtn)}</td>
+        <td>
+          <div class="prog-wrap">
+            <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(ctnAch,100)}%;background:${achColor(ctnAch)}"></div></div>
+            <span class="ach-badge ${achClass(ctnAch)}">${ctnAch}%</span>
+          </div>
+        </td>
+        <td style="color:${btgCtn>0?'var(--red)':btgCtn<0?'var(--green)':'var(--txt-m)'}">
+          ${btgCtn > 0 ? fmtN(btgCtn) : btgCtn < 0 ? `<span style="color:var(--green)">+${fmtN(Math.abs(btgCtn))}</span>` : '—'}
+        </td>
+      </tr>`;
+    });
+
+    /* TSE subtotal row */
+    const stBillAch = pct(stBills, stBillsTgt);
+    const stCtnAch  = pct(stSalesCtn, stTgtCtn);
+    html += `<tr class="tse-row">
+      <td colspan="2">${tse} &nbsp;<span style="font-size:9px;font-weight:400;color:var(--txt-m)">${rows.length} OBs — ${dist}</span></td>
+      <td>${fmtN(stOutlets)}</td>
+      <td>${fmtN(stBillsTgt)}</td>
+      <td>${fmtN(stBills)}</td>
+      <td><span class="ach-badge ${achClass(stBillAch)}">${stBillAch}%</span></td>
+      <td>—</td>
+      <td>${fmtN(stTgtCtn)}</td>
+      <td>${fmtN(stSalesCtn)}</td>
+      <td><span class="ach-badge ${achClass(stCtnAch)}">${stCtnAch}%</span></td>
+      <td style="color:${stBtgCtn>0?'var(--red)':'var(--green)'}">${stBtgCtn>0?fmtN(stBtgCtn):`+${fmtN(Math.abs(stBtgCtn))}`}</td>
+    </tr>`;
+
+    gtSalesCtn+=stSalesCtn; gtTgtCtn+=stTgtCtn;
+    gtBills+=stBills; gtBillsTgt+=stBillsTgt;
+    gtOutlets+=stOutlets; gtBtgCtn+=stBtgCtn;
+  });
+
+  /* Grand total footer */
+  const gtBillAch = pct(gtBills, gtBillsTgt);
+  const gtCtnAch  = pct(gtSalesCtn, gtTgtCtn);
+  html += `</tbody><tfoot><tr>
+    <td colspan="2">Grand Total &nbsp;<span style="font-size:9px;font-weight:400;color:var(--txt-m)">${data.length} OBs · Hunain Ali</span></td>
+    <td>${fmtN(gtOutlets)}</td>
+    <td>${fmtN(gtBillsTgt)}</td>
+    <td>${fmtN(gtBills)}</td>
+    <td><span class="ach-badge ${achClass(gtBillAch)}">${gtBillAch}%</span></td>
+    <td>—</td>
+    <td>${fmtN(gtTgtCtn)}</td>
+    <td>${fmtN(gtSalesCtn)}</td>
+    <td><span class="ach-badge ${achClass(gtCtnAch)}">${gtCtnAch}%</span></td>
+    <td style="color:${gtBtgCtn>0?'var(--red)':'var(--green)'}">${gtBtgCtn>0?fmtN(gtBtgCtn):`+${fmtN(Math.abs(gtBtgCtn))}`}</td>
+  </tr></tfoot></table>`;
+
+  document.getElementById('tblCon').innerHTML = html;
+}
+
+/* ════ EXPORT ═══════════════════════════════════════════ */
+function exportCSV() {
+  const data = getData();
+  if (!data.length) { toast('No data to export', true); return; }
+  const hdrs = Object.keys(data[0]);
+  const csv  = [hdrs, ...data.map(r => hdrs.map(h => `"${String(r[h]??'').replace(/"/g,'""')}"`))].map(r=>r.join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8;'})),
+    download: `bunnys-mtd-${new Date().toISOString().slice(0,10)}.csv`
+  });
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('CSV exported ✓');
+}
+
+/* ════ BOOT ═════════════════════════════════════════════ */
+fetch('kpidata.json')
+  .then(r => r.json())
+  .then(raw => {
+    /* Normalise keys — trim whitespace and invisible chars */
+    allData = raw.map(row => {
+      const clean = {};
+      Object.keys(row).forEach(k => {
+        const nk = k.trim();
+        const v  = row[k];
+        clean[nk] = (typeof v === 'string') ? v.trim() : v;
+      });
+      return clean;
+    });
+    initFilter();
+    updateMgr();
+    render();
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById('tblCon').innerHTML =
+      `<div class="state-box" style="color:var(--red)">
+        ⚠ Could not load kpidata.json — ensure the file is in the same folder as this page.
+      </div>`;
+  });
+</script>
+</body>
+</html>
